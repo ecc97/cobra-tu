@@ -82,6 +82,20 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validación: Tipo de archivo
+    const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      alert('Solo se permiten imágenes (PNG, JPG, WebP)');
+      return;
+    }
+
+    // Validación: Tamaño máximo 2MB
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    if (file.size > maxSize) {
+      alert('La imagen debe ser menor a 2MB');
+      return;
+    }
+
     const reader = new FileReader();
     reader.onloadend = () => {
       setInvoice((prev) => ({
@@ -98,50 +112,50 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
       {/* EMISOR */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-primary">Tus Datos</h2>
-        <div className="space-y-3">
+      <section className="space-y-2 sm:space-y-4">
+        <h2 className="text-base sm:text-lg font-semibold text-primary">Tus Datos</h2>
+        <div className="space-y-2 sm:space-y-3">
           <input
             type="text"
             placeholder="Nombre o Empresa"
             value={invoice.emitterName}
             onChange={(e) => updateEmitter('emitterName', e.target.value)}
-            className="w-full px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50"
+            className="w-full px-3 sm:px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50 text-sm sm:text-base"
           />
           <input
             type="email"
             placeholder="Email"
             value={invoice.emitterEmail}
             onChange={(e) => updateEmitter('emitterEmail', e.target.value)}
-            className="w-full px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50"
+            className="w-full px-3 sm:px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50 text-sm sm:text-base"
           />
           <input
             type="tel"
             placeholder="Teléfono"
             value={invoice.emitterPhone}
             onChange={(e) => updateEmitter('emitterPhone', e.target.value)}
-            className="w-full px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50"
+            className="w-full px-3 sm:px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50 text-sm sm:text-base"
           />
           <input
             type="text"
             placeholder="Dirección"
             value={invoice.emitterAddress}
             onChange={(e) => updateEmitter('emitterAddress', e.target.value)}
-            className="w-full px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50"
+            className="w-full px-3 sm:px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50 text-sm sm:text-base"
           />
           <input
             type="text"
             placeholder="RFC / RUT / NIF"
             value={invoice.emitterTaxId}
             onChange={(e) => updateEmitter('emitterTaxId', e.target.value)}
-            className="w-full px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50"
+            className="w-full px-3 sm:px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50 text-sm sm:text-base"
           />
 
           {/* Logo Upload */}
-          <div className="flex items-center gap-3">
-            <label className="px-4 py-2 rounded bg-secondary text-black cursor-pointer hover:bg-secondary/90 transition-colors">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+            <label className="px-3 sm:px-4 py-2 rounded bg-secondary text-black cursor-pointer hover:bg-secondary/90 transition-colors text-xs sm:text-sm font-semibold whitespace-nowrap">
               Subir Logo
               <input
                 type="file"
@@ -151,57 +165,71 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
               />
             </label>
             {invoice.emitterLogo && (
-              <span className="text-sm text-secondary">Logo subido ✓</span>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <span className="text-xs sm:text-sm text-secondary font-semibold">Logo subido ✓</span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setInvoice((prev) => ({ ...prev, emitterLogo: undefined }))
+                  }
+                  className="text-xs sm:text-sm text-error hover:underline text-left sm:text-auto"
+                >
+                  Eliminar
+                </button>
+              </div>
             )}
+            <span className="text-xs text-on-surface/50 hidden sm:inline">
+              (PNG, JPG o WebP, máx. 2MB)
+            </span>
           </div>
         </div>
       </section>
 
       {/* RECEPTOR */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-primary">Datos del Cliente</h2>
-        <div className="space-y-3">
+      <section className="space-y-2 sm:space-y-4">
+        <h2 className="text-base sm:text-lg font-semibold text-primary">Datos del Cliente</h2>
+        <div className="space-y-2 sm:space-y-3">
           <input
             type="text"
             placeholder="Nombre o Empresa"
             value={invoice.receiverName}
             onChange={(e) => updateReceiver('name', e.target.value)}
-            className="w-full px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50"
+            className="w-full px-3 sm:px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50 text-sm sm:text-base"
           />
           <input
             type="email"
             placeholder="Email"
             value={invoice.receiverEmail}
             onChange={(e) => updateReceiver('email', e.target.value)}
-            className="w-full px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50"
+            className="w-full px-3 sm:px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50 text-sm sm:text-base"
           />
           <input
             type="text"
             placeholder="Dirección"
             value={invoice.receiverAddress}
             onChange={(e) => updateReceiver('address', e.target.value)}
-            className="w-full px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50"
+            className="w-full px-3 sm:px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50 text-sm sm:text-base"
           />
           <input
             type="text"
             placeholder="RFC / RUT / NIF"
             value={invoice.receiverTaxId}
             onChange={(e) => updateReceiver('taxid', e.target.value)}
-            className="w-full px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50"
+            className="w-full px-3 sm:px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50 text-sm sm:text-base"
           />
         </div>
       </section>
 
       {/* DATOS DE FACTURA */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-primary">Números y Fechas</h2>
-        <div className="grid grid-cols-2 gap-3">
+      <section className="space-y-2 sm:space-y-4">
+        <h2 className="text-base sm:text-lg font-semibold text-primary">Números y Fechas</h2>
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <input
             type="text"
             placeholder="Número"
             value={invoice.invoiceNumber}
             onChange={(e) => updateEmitter('invoiceNumber', e.target.value)}
-            className="w-full px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50"
+            className="w-full px-3 sm:px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50 text-sm sm:text-base"
           />
           <select
             value={invoice.currency}
@@ -211,7 +239,7 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
                 e.target.value as 'USD' | 'EUR' | 'COP' | 'MXN'
               )
             }
-            className="w-full px-4 py-2 rounded bg-surface-container text-on-surface"
+            className="w-full px-3 sm:px-4 py-2 rounded bg-surface-container text-on-surface text-sm sm:text-base"
           >
             {SUPPORTED_CURRENCIES.map((curr) => (
               <option key={curr} value={curr}>
@@ -220,29 +248,29 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
             ))}
           </select>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <input
             type="date"
             value={invoice.issueDate}
             onChange={(e) => updateEmitter('issueDate', e.target.value)}
-            className="w-full px-4 py-2 rounded bg-surface-container text-on-surface"
+            className="w-full px-3 sm:px-4 py-2 rounded bg-surface-container text-on-surface text-sm sm:text-base"
           />
           <input
             type="date"
             value={invoice.dueDate}
             onChange={(e) => updateEmitter('dueDate', e.target.value)}
-            className="w-full px-4 py-2 rounded bg-surface-container text-on-surface"
+            className="w-full px-3 sm:px-4 py-2 rounded bg-surface-container text-on-surface text-sm sm:text-base"
           />
         </div>
       </section>
 
       {/* ÍTEMS */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-primary">Servicios/Productos</h2>
-        <div className="space-y-3">
+      <section className="space-y-2 sm:space-y-4">
+        <h2 className="text-base sm:text-lg font-semibold text-primary">Servicios/Productos</h2>
+        <div className="space-y-2 sm:space-y-3">
           {invoice.items.map((item, idx) => (
-            <div key={item.id} className="space-y-2">
-              <div className="flex gap-2">
+            <div key={item.id} className="space-y-1 sm:space-y-2">
+              <div className="flex gap-1 sm:gap-2 flex-wrap">
                 <input
                   type="text"
                   placeholder="Descripción"
@@ -250,7 +278,7 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
                   onChange={(e) =>
                     updateItem(item.id, 'description', e.target.value)
                   }
-                  className="flex-1 px-4 py-2 rounded bg-surface-container text-on-surface text-sm placeholder:text-on-surface/50"
+                  className="flex-1 min-w-[120px] px-3 py-2 rounded bg-surface-container text-on-surface text-xs sm:text-sm placeholder:text-on-surface/50"
                 />
                 <input
                   type="number"
@@ -260,7 +288,7 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
                   onChange={(e) =>
                     updateItem(item.id, 'quantity', parseFloat(e.target.value))
                   }
-                  className="w-16 px-4 py-2 rounded bg-surface-container text-on-surface text-sm"
+                  className="w-12 sm:w-16 px-2 sm:px-3 py-2 rounded bg-surface-container text-on-surface text-xs sm:text-sm"
                 />
                 <input
                   type="number"
@@ -271,13 +299,13 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
                   onChange={(e) =>
                     updateItem(item.id, 'price', parseFloat(e.target.value))
                   }
-                  className="w-24 px-4 py-2 rounded bg-surface-container text-on-surface text-sm"
+                  className="w-16 sm:w-24 px-2 sm:px-3 py-2 rounded bg-surface-container text-on-surface text-xs sm:text-sm"
                 />
                 {invoice.items.length > 1 && (
                   <button
                     type="button"
                     onClick={() => removeItem(item.id)}
-                    className="px-2 py-2 text-error hover:bg-surface-container-high rounded transition-colors"
+                    className="px-2 py-2 text-error hover:bg-surface-container-high rounded transition-colors text-sm sm:text-base"
                   >
                     ✕
                   </button>
@@ -298,27 +326,27 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
         <button
           type="button"
           onClick={addItem}
-          className="px-4 py-2 rounded bg-surface-container text-secondary hover:bg-surface-container-high transition-colors text-sm"
+          className="px-3 sm:px-4 py-2 rounded bg-surface-container text-secondary hover:bg-surface-container-high transition-colors text-xs sm:text-sm"
         >
           + Agregar Servicio
         </button>
       </section>
 
       {/* NOTAS */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-primary">Notas</h2>
+      <section className="space-y-2 sm:space-y-4">
+        <h2 className="text-base sm:text-lg font-semibold text-primary">Notas</h2>
         <textarea
           placeholder="Notas adicionales (opcional)"
           value={invoice.notes}
           onChange={(e) => updateEmitter('notes', e.target.value)}
           rows={3}
-          className="w-full px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50 resize-none"
+          className="w-full px-3 sm:px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50 resize-none text-sm sm:text-base"
         />
       </section>
 
       <button
         type="submit"
-        className="w-full px-6 py-3 rounded bg-primary text-on-primary font-semibold hover:bg-primary-container transition-colors"
+        className="w-full px-4 sm:px-6 py-3 rounded bg-primary text-on-primary font-semibold hover:bg-primary-container transition-colors text-sm sm:text-base"
       >
         Ver Previsualización
       </button>

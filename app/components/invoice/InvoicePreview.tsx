@@ -17,93 +17,145 @@ export function InvoicePreview({ data }: InvoicePreviewProps) {
   return (
     <div
       id="invoice-paper"
-      className="invoice-paper p-8 max-w-2xl mx-auto min-h-screen flex flex-col"
+      style={{
+        backgroundColor: '#ffffff',
+        color: '#000000',
+        padding: '2rem',
+        maxWidth: '42rem',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        borderRadius: '0.25rem',
+        boxShadow:
+          '0 4px 6px rgba(0, 0, 0, 0.3), 0 10px 40px rgba(0, 0, 0, 0.4), 0 2px 80px rgba(0, 0, 0, 0.2)',
+      }}
     >
       {/* Header */}
-      <div className="flex justify-between items-start mb-8">
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          marginBottom: '2rem',
+        }}
+      >
         <div>
           {data.emitterLogo && (
             <img
               src={data.emitterLogo}
               alt="Logo"
-              className="h-16 object-contain mb-4"
+              style={{
+                height: '4rem',
+                objectFit: 'contain',
+                marginBottom: '1rem',
+              }}
             />
           )}
-          <h1 className="text-3xl font-bold text-black">
+          <h1 style={{ fontSize: '1.875rem', fontWeight: 'bold', margin: 0 }}>
             {data.emitterName || 'Tu Empresa'}
           </h1>
         </div>
-        <div className="text-right">
-          <p className="text-4xl font-bold text-black">FACTURA</p>
-          <p className="text-gray-600">
+        <div style={{ textAlign: 'right' }}>
+          <p style={{ fontSize: '2.25rem', fontWeight: 'bold', margin: '0 0 0.5rem 0' }}>
+            FACTURA
+          </p>
+          <p style={{ color: '#4b5563', margin: 0 }}>
             #{data.invoiceNumber.padStart(3, '0')}
           </p>
         </div>
       </div>
 
       {/* Invoice Details */}
-      <div className="grid grid-cols-2 gap-8 mb-8 text-sm">
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '2rem',
+          marginBottom: '2rem',
+          fontSize: '0.875rem',
+        }}
+      >
         <div>
-          <p className="font-semibold text-black mb-2">DE:</p>
-          <p className="text-gray-700">{data.emitterName}</p>
+          <p style={{ fontWeight: 'bold', marginBottom: '0.5rem', color: '#000' }}>DE:</p>
+          <p style={{ color: '#4b5563', margin: '0.25rem 0' }}>{data.emitterName}</p>
           {data.emitterEmail && (
-            <p className="text-gray-600">{data.emitterEmail}</p>
+            <p style={{ color: '#6b7280', margin: '0.25rem 0' }}>{data.emitterEmail}</p>
           )}
           {data.emitterPhone && (
-            <p className="text-gray-600">{data.emitterPhone}</p>
+            <p style={{ color: '#6b7280', margin: '0.25rem 0' }}>{data.emitterPhone}</p>
           )}
           {data.emitterAddress && (
-            <p className="text-gray-600">{data.emitterAddress}</p>
+            <p style={{ color: '#6b7280', margin: '0.25rem 0' }}>{data.emitterAddress}</p>
           )}
           {data.emitterTaxId && (
-            <p className="text-gray-600">RFC: {data.emitterTaxId}</p>
+            <p style={{ color: '#6b7280', margin: '0.25rem 0' }}>RFC: {data.emitterTaxId}</p>
           )}
         </div>
         <div>
-          <p className="font-semibold text-black mb-2">PARA:</p>
-          <p className="text-gray-700">{data.receiverName}</p>
+          <p style={{ fontWeight: 'bold', marginBottom: '0.5rem', color: '#000' }}>PARA:</p>
+          <p style={{ color: '#4b5563', margin: '0.25rem 0' }}>{data.receiverName}</p>
           {data.receiverEmail && (
-            <p className="text-gray-600">{data.receiverEmail}</p>
+            <p style={{ color: '#6b7280', margin: '0.25rem 0' }}>{data.receiverEmail}</p>
           )}
           {data.receiverAddress && (
-            <p className="text-gray-600">{data.receiverAddress}</p>
+            <p style={{ color: '#6b7280', margin: '0.25rem 0' }}>{data.receiverAddress}</p>
           )}
           {data.receiverTaxId && (
-            <p className="text-gray-600">RFC: {data.receiverTaxId}</p>
+            <p style={{ color: '#6b7280', margin: '0.25rem 0' }}>RFC: {data.receiverTaxId}</p>
           )}
         </div>
       </div>
 
       {/* Dates */}
-      <div className="grid grid-cols-2 gap-4 mb-8 text-sm border-t border-b border-gray-300 py-4">
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '1rem',
+          marginBottom: '2rem',
+          fontSize: '0.875rem',
+          borderTop: '1px solid #d1d5db',
+          borderBottom: '1px solid #d1d5db',
+          padding: '1rem 0',
+        }}
+      >
         <div>
-          <p className="text-gray-600">Fecha de Emisión</p>
-          <p className="font-semibold text-black">
+          <p style={{ color: '#6b7280', margin: 0 }}>Fecha de Emisión</p>
+          <p style={{ fontWeight: 'bold', color: '#000', margin: 0 }}>
             {new Date(data.issueDate).toLocaleDateString('es-ES')}
           </p>
         </div>
         <div>
-          <p className="text-gray-600">Fecha de Vencimiento</p>
-          <p className="font-semibold text-black">
+          <p style={{ color: '#6b7280', margin: 0 }}>Fecha de Vencimiento</p>
+          <p style={{ fontWeight: 'bold', color: '#000', margin: 0 }}>
             {new Date(data.dueDate).toLocaleDateString('es-ES')}
           </p>
         </div>
       </div>
 
       {/* Items Table */}
-      <table className="w-full mb-8 text-sm">
+      <table
+        style={{
+          width: '100%',
+          marginBottom: '2rem',
+          fontSize: '0.875rem',
+          borderCollapse: 'collapse',
+        }}
+      >
         <thead>
-          <tr className="border-b-2 border-gray-300">
-            <th className="text-left py-3 text-black font-semibold">
+          <tr style={{ borderBottom: '2px solid #1f2937' }}>
+            <th style={{ textAlign: 'left', padding: '0.75rem 0', color: '#000', fontWeight: 'bold' }}>
               Descripción
             </th>
-            <th className="text-right py-3 text-black font-semibold w-20">
+            <th style={{ textAlign: 'right', padding: '0.75rem 0', color: '#000', fontWeight: 'bold', width: '5rem' }}>
               Cantidad
             </th>
-            <th className="text-right py-3 text-black font-semibold w-24">
+            <th style={{ textAlign: 'right', padding: '0.75rem 0', color: '#000', fontWeight: 'bold', width: '6rem' }}>
               Precio
             </th>
-            <th className="text-right py-3 text-black font-semibold w-24">
+            <th style={{ textAlign: 'right', padding: '0.75rem 0', color: '#000', fontWeight: 'bold', width: '6rem' }}>
               Total
             </th>
           </tr>
@@ -112,17 +164,19 @@ export function InvoicePreview({ data }: InvoicePreviewProps) {
           {data.items.map((item) => (
             <tr
               key={item.id}
-              className="border-b border-gray-200 hover:bg-gray-50"
+              style={{ borderBottom: '1px solid #e5e7eb' }}
             >
-              <td className="py-3 text-gray-700">{item.description}</td>
-              <td className="text-right py-3 text-gray-700">
+              <td style={{ padding: '0.75rem 0', color: '#4b5563' }}>
+                {item.description}
+              </td>
+              <td style={{ textAlign: 'right', padding: '0.75rem 0', color: '#4b5563' }}>
                 {item.quantity}
               </td>
-              <td className="text-right py-3 text-gray-700">
+              <td style={{ textAlign: 'right', padding: '0.75rem 0', color: '#4b5563' }}>
                 {currencySymbol}
                 {item.price.toFixed(2)}
               </td>
-              <td className="text-right py-3 text-black font-semibold">
+              <td style={{ textAlign: 'right', padding: '0.75rem 0', color: '#000', fontWeight: 'bold' }}>
                 {currencySymbol}
                 {(item.quantity * item.price).toFixed(2)}
               </td>
@@ -132,26 +186,42 @@ export function InvoicePreview({ data }: InvoicePreviewProps) {
       </table>
 
       {/* Totals */}
-      <div className="ml-auto w-80 mb-8">
-        <div className="flex justify-between py-2 text-sm">
-          <span className="text-gray-700">Subtotal:</span>
-          <span className="text-black font-semibold">
+      <div style={{ marginLeft: 'auto', width: '20rem', marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', fontSize: '0.875rem' }}>
+          <span style={{ color: '#4b5563' }}>Subtotal:</span>
+          <span style={{ color: '#000', fontWeight: 'bold' }}>
             {currencySymbol}
             {subtotal.toFixed(2)}
           </span>
         </div>
-        <div className="flex justify-between py-2 text-sm border-b border-gray-300">
-          <span className="text-gray-700">
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            padding: '0.5rem 0',
+            fontSize: '0.875rem',
+            borderBottom: '1px solid #d1d5db',
+          }}
+        >
+          <span style={{ color: '#4b5563' }}>
             IVA ({(data.taxRate * 100).toFixed(0)}%):
           </span>
-          <span className="text-black font-semibold">
+          <span style={{ color: '#000', fontWeight: 'bold' }}>
             {currencySymbol}
             {taxAmount.toFixed(2)}
           </span>
         </div>
-        <div className="flex justify-between py-3 text-lg border-t-2 border-black">
-          <span className="text-black font-bold">TOTAL:</span>
-          <span className="text-black font-bold">
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            padding: '0.75rem 0',
+            fontSize: '1.125rem',
+            borderTop: '2px solid #000',
+          }}
+        >
+          <span style={{ color: '#000', fontWeight: 'bold' }}>TOTAL:</span>
+          <span style={{ color: '#000', fontWeight: 'bold' }}>
             {currencySymbol}
             {total.toFixed(2)}
           </span>
@@ -160,9 +230,17 @@ export function InvoicePreview({ data }: InvoicePreviewProps) {
 
       {/* Notes */}
       {data.notes && (
-        <div className="text-sm text-gray-700 border-t border-gray-300 pt-4 mt-auto">
-          <p className="font-semibold text-black mb-2">Notas:</p>
-          <p>{data.notes}</p>
+        <div
+          style={{
+            fontSize: '0.875rem',
+            color: '#4b5563',
+            borderTop: '1px solid #d1d5db',
+            paddingTop: '1rem',
+            marginTop: 'auto',
+          }}
+        >
+          <p style={{ fontWeight: 'bold', color: '#000', marginBottom: '0.5rem' }}>Notas:</p>
+          <p style={{ margin: 0 }}>{data.notes}</p>
         </div>
       )}
     </div>
