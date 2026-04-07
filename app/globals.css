@@ -1,26 +1,59 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+/* Design System - InvoiceFlow */
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --surface: #111318;
+    --surface-dim: #111318;
+    --surface-bright: #37393f;
+    --surface-container: #1e2025;
+    --surface-container-low: #1a1b21;
+    --surface-container-lowest: #0c0e13;
+    --surface-container-high: #282a2f;
+    --surface-container-highest: #33353a;
+    --on-surface: #e2e2e9;
+    
+    --primary: #c0c1ff;
+    --primary-container: #8083ff;
+    --on-primary: #1000a9;
+    
+    --secondary: #4ede63;
+    --secondary-container: #00a572;
+    --on-secondary: #003824;
+    
+    --error: #ffb4ab;
+    --on-error: #690005;
+  }
+
+  body {
+    background-color: var(--surface);
+    color: var(--on-surface);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Invoice Paper - White canvas */
+.invoice-paper {
+  background-color: #ffffff;
+  color: #000000;
+  border-radius: 4px;
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.3),
+    0 10px 40px rgba(0, 0, 0, 0.4),
+    0 2px 80px rgba(0, 0, 0, 0.2);
+}
+
+/* Surface shifts - no borders */
+.surface-shift {
+  background-color: var(--surface-container);
+}
+
+/* Glass morphism */
+.glass-overlay {
+  background-color: rgba(40, 42, 47, 0.8);
+  backdrop-filter: blur(20px);
 }
