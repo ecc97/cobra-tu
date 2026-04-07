@@ -3,14 +3,17 @@
 import { useState } from 'react';
 import { InvoiceForm } from '@/components/forms/InvoiceForm';
 import { InvoicePreview } from '@/components/invoice/InvoicePreview';
+import { DownloadPDFButton } from '@/components/invoice/DownloadPDFButton';
 import { InvoiceData } from '@/types/invoice';
 import { DEFAULT_INVOICE } from '@/lib/constants';
 
 export default function NuevaFacturaPage() {
   const [invoiceData, setInvoiceData] = useState<InvoiceData>(DEFAULT_INVOICE);
+  const [showPreview, setShowPreview] = useState(false);
 
   const handleFormSubmit = (data: InvoiceData) => {
     setInvoiceData(data);
+    setShowPreview(true);
     // Save to localStorage
     localStorage.setItem('lastInvoice', JSON.stringify(data));
   };
@@ -20,33 +23,51 @@ export default function NuevaFacturaPage() {
       {/* Form Panel - Left */}
       <div className="w-full md:w-1/2 p-8 overflow-y-auto">
         <div className="max-w-lg">
-          <h1 className="text-3xl font-bold text-primary mb-8">
+          <h1 className="text-3xl font-bold text-primary mb-2">
             Nueva Factura
           </h1>
+          <p className="text-on-surface/70 mb-8">
+            Llena los datos y tu factura se actualizará en tiempo real.
+          </p>
           <InvoiceForm onSubmit={handleFormSubmit} />
         </div>
       </div>
 
       {/* Preview Panel - Right */}
-      <div className="hidden md:flex md:w-1/2 bg-surface-container-low p-8 overflow-y-auto">
-        <div className="flex-1">
+      <div
+        className={`hidden md:flex md:w-1/2 bg-surface-container-low p-8 overflow-y-auto flex-col ${
+          showPreview ? '' : ''
+        }`}
+      >
+        <div className="flex-1 mb-6">
           <InvoicePreview data={invoiceData} />
         </div>
+        {showPreview && (
+          <div className="sticky bottom-0 bg-surface-container-low pt-4 border-t border-surface-container-highest">
+            <DownloadPDFButton invoiceNumber={invoiceData.invoiceNumber} />
+          </div>
+        )}
       </div>
 
       {/* Mobile - Preview Modal */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-surface-container-high p-4 border-t border-surface-container-highest">
-        <button
-          onClick={() => {
-            // Toggle full preview
-            const preview = document.getElementById('invoice-paper');
-            if (preview) preview.classList.toggle('hidden');
-          }}
-          className="w-full px-4 py-3 bg-primary text-on-primary rounded font-semibold hover:bg-primary-container transition-colors"
-        >
-          Ver Previsualización
-        </button>
-      </div>
+      {showPreview && (
+        <div className="md:hidden fixed inset-0 bg-black/50 z-50 overflow-y-auto">
+          <div className="bg-surface-container-low p-4 min-h-screen">
+            <div className="mb-6">
+              <button
+                onClick={() => setShowPreview(false)}
+                className="mb-4 px-4 py-2 rounded bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors"
+              >
+                ← Volver
+              </button>
+              <InvoicePreview data={invoiceData} />
+            </div>
+            <div className="sticky bottom-0 bg-surface-container-low pt-4 pb-4">
+              <DownloadPDFButton invoiceNumber={invoiceData.invoiceNumber} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

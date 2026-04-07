@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { InvoiceData, InvoiceItem } from '@/types/invoice';
 import { SUPPORTED_CURRENCIES } from '@/lib/calculations';
+import { ExpandDescriptionButton } from './ExpandDescriptionButton';
 
 const DEFAULT_INVOICE: InvoiceData = {
   emitterName: '',
@@ -238,47 +239,58 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
       {/* ÍTEMS */}
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-primary">Servicios/Productos</h2>
-        <div className="space-y-2">
+        <div className="space-y-3">
           {invoice.items.map((item, idx) => (
-            <div key={item.id} className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Descripción"
-                value={item.description}
-                onChange={(e) =>
-                  updateItem(item.id, 'description', e.target.value)
-                }
-                className="flex-1 px-4 py-2 rounded bg-surface-container text-on-surface text-sm placeholder:text-on-surface/50"
-              />
-              <input
-                type="number"
-                placeholder="Cant"
-                min="1"
-                value={item.quantity}
-                onChange={(e) =>
-                  updateItem(item.id, 'quantity', parseFloat(e.target.value))
-                }
-                className="w-16 px-4 py-2 rounded bg-surface-container text-on-surface text-sm"
-              />
-              <input
-                type="number"
-                placeholder="Precio"
-                min="0"
-                step="0.01"
-                value={item.price}
-                onChange={(e) =>
-                  updateItem(item.id, 'price', parseFloat(e.target.value))
-                }
-                className="w-24 px-4 py-2 rounded bg-surface-container text-on-surface text-sm"
-              />
-              {invoice.items.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeItem(item.id)}
-                  className="px-2 py-2 text-error hover:bg-surface-container-high rounded transition-colors"
-                >
-                  ✕
-                </button>
+            <div key={item.id} className="space-y-2">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Descripción"
+                  value={item.description}
+                  onChange={(e) =>
+                    updateItem(item.id, 'description', e.target.value)
+                  }
+                  className="flex-1 px-4 py-2 rounded bg-surface-container text-on-surface text-sm placeholder:text-on-surface/50"
+                />
+                <input
+                  type="number"
+                  placeholder="Cant"
+                  min="1"
+                  value={item.quantity}
+                  onChange={(e) =>
+                    updateItem(item.id, 'quantity', parseFloat(e.target.value))
+                  }
+                  className="w-16 px-4 py-2 rounded bg-surface-container text-on-surface text-sm"
+                />
+                <input
+                  type="number"
+                  placeholder="Precio"
+                  min="0"
+                  step="0.01"
+                  value={item.price}
+                  onChange={(e) =>
+                    updateItem(item.id, 'price', parseFloat(e.target.value))
+                  }
+                  className="w-24 px-4 py-2 rounded bg-surface-container text-on-surface text-sm"
+                />
+                {invoice.items.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeItem(item.id)}
+                    className="px-2 py-2 text-error hover:bg-surface-container-high rounded transition-colors"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              {/* Botón Mejorar con IA */}
+              {item.description && (
+                <ExpandDescriptionButton
+                  currentDescription={item.description}
+                  onDescriptionUpdated={(newDesc) =>
+                    updateItem(item.id, 'description', newDesc)
+                  }
+                />
               )}
             </div>
           ))}
@@ -308,7 +320,7 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
         type="submit"
         className="w-full px-6 py-3 rounded bg-primary text-on-primary font-semibold hover:bg-primary-container transition-colors"
       >
-        Generar Factura
+        Ver Previsualización
       </button>
     </form>
   );
