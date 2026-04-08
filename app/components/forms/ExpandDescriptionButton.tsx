@@ -24,34 +24,59 @@ export function ExpandDescriptionButton({
       return;
     }
 
+    // Prevenir múltiples requests simultáneos
+    if (isLoading) {
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
+
+      // Timeout de 10s para requests lentas
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
       const response = await fetch('/api/expand-description', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ description: currentDescription }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         if (response.status === 429) {
-          setError('Límite de solicitudes. Intenta en unos minutos');
+          setError('Límite diario alcanzado. Intenta mañana');
         } else if (response.status === 400) {
-          setError('Descripción vacía. Intenta de nuevo');
+          setError('Descripción vacía o inválida');
+        } else if (response.status === 500) {
+          setError('Error del servidor. Intenta de nuevo');
         } else {
-          setError('Error al mejorar. Intenta de nuevo');
+          setError('No se pudo mejorar. Intenta de nuevo');
         }
         return;
       }
 
       const data = await response.json();
+      if (!data.expandedDescription) {
+        setError('Respuesta vacía de IA');
+        return;
+      }
+
       onDescriptionUpdated(data.expandedDescription);
       setError(null);
       setShowSuccessToast(true);
-    } catch (err) {
-      setError('Error de conexión. Verifica tu internet');
-      console.error(err);
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        setError('Solicitud tardó mucho. Intenta de nuevo');
+      } else if (err instanceof TypeError) {
+        setError('Error de conexión. Revisa tu internet');
+      } else {
+        setError('Error inesperado. Intenta de nuevo');
+      }
+      console.error('Expand description error:', err);
     } finally {
       setIsLoading(false);
     }

@@ -32,16 +32,43 @@ export function DownloadPDFButton({
       return;
     }
 
+    // Prevenir múltiples descargas simultáneas
+    if (isLoading) {
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
 
+      // Verificar conectividad
+      if (!navigator.onLine) {
+        setError('Sin conexión a internet');
+        return;
+      }
+
       const fileName = `factura-${invoiceNumber}-${new Date().getTime()}.pdf`;
-      await generatePDFFromElement('invoice-paper', fileName);
-      setError(null);
-      setShowSuccessToast(true);
+      
+      // Timeout de 15s para generar PDF
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+      try {
+        await generatePDFFromElement('invoice-paper', fileName);
+        clearTimeout(timeoutId);
+        setError(null);
+        setShowSuccessToast(true);
+      } catch (pdfErr: any) {
+        clearTimeout(timeoutId);
+        if (pdfErr.name === 'AbortError') {
+          setError('Generación de PDF tardó mucho');
+        } else {
+          setError('Error al generar PDF. Intenta de nuevo');
+        }
+        console.error('PDF error:', pdfErr);
+      }
     } catch (err) {
-      setError('Error al descargar el PDF. Intenta de nuevo.');
+      setError('Error inesperado. Intenta de nuevo');
       console.error(err);
     } finally {
       setIsLoading(false);

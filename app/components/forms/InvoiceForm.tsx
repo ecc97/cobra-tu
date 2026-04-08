@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { InvoiceData, InvoiceItem } from '@/types/invoice';
 import { SUPPORTED_CURRENCIES } from '@/lib/calculations';
+import { validators } from '@/lib/validators';
 import { ExpandDescriptionButton } from './ExpandDescriptionButton';
 import { Toast } from '@/components/ui/Toast';
 
@@ -44,15 +45,41 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
   const [showAddItemFeedback, setShowAddItemFeedback] = useState(false);
 
   const validateForm = (): string | null => {
-    if (!invoice.emitterName.trim()) return 'Completa tu nombre o empresa';
-    if (!invoice.receiverName.trim()) return 'Completa el nombre del cliente';
-    if (!invoice.invoiceNumber.trim()) return 'Agrega un número de factura';
-    
-    const hasValidItems = invoice.items.some(
-      (item) => item.description.trim() && item.price > 0
-    );
-    if (!hasValidItems) return 'Al menos un servicio debe tener descripción y precio';
-    
+    // Validar nombre del emisor
+    if (!validators.isValidName(invoice.emitterName)) {
+      return 'Tu nombre debe tener al menos 2 caracteres';
+    }
+
+    // Validar email del emisor si está presente
+    if (invoice.emitterEmail && !validators.isValidEmail(invoice.emitterEmail)) {
+      return 'Email inválido';
+    }
+
+    // Validar nombre del receptor
+    if (!validators.isValidName(invoice.receiverName)) {
+      return 'Nombre del cliente debe tener al menos 2 caracteres';
+    }
+
+    // Validar email del receptor si está presente
+    if (invoice.receiverEmail && !validators.isValidEmail(invoice.receiverEmail)) {
+      return 'Email del cliente inválido';
+    }
+
+    // Validar número de factura
+    if (!invoice.invoiceNumber.trim()) {
+      return 'Agrega un número de factura';
+    }
+
+    // Validar rango de fechas
+    if (!validators.isValidDateRange(invoice.issueDate, invoice.dueDate)) {
+      return 'Fecha de vencimiento debe ser igual o posterior a la de emisión';
+    }
+
+    // Validar items
+    if (!validators.hasValidItems(invoice.items)) {
+      return 'Al menos un servicio debe tener descripción, precio y cantidad válidos';
+    }
+
     return null;
   };
 
@@ -70,10 +97,31 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
   };
 
   const updateItem = (itemId: string, field: keyof InvoiceItem, value: any) => {
+    let finalValue = value;
+
+    // Validar casos edge según el campo
+    if (field === 'quantity') {
+      const num = parseFloat(value);
+      if (isNaN(num) || num < 0) {
+        finalValue = 1; // Default a 1 si es inválido
+      } else {
+        finalValue = Math.max(1, Math.floor(num)); // Mínimo 1, solo enteros
+      }
+    }
+
+    if (field === 'price') {
+      const num = parseFloat(value);
+      if (isNaN(num) || num < 0) {
+        finalValue = 0; // Default a 0 si es inválido
+      } else {
+        finalValue = validators.normalizePrice(num); // Máximo 2 decimales
+      }
+    }
+
     setInvoice((prev) => ({
       ...prev,
       items: prev.items.map((item) =>
-        item.id === itemId ? { ...item, [field]: value } : item
+        item.id === itemId ? { ...item, [field]: finalValue } : item
       ),
     }));
     setValidationError(null);
@@ -106,25 +154,46 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
     // Validación: Tipo de archivo
     const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
     if (!validTypes.includes(file.type)) {
-      alert('Solo se permiten imágenes (PNG, JPG, WebP)');
+      setValidationError('Solo PNG, JPG o WebP');
+      setTimeout(() => setValidationError(null), 3000);
       return;
     }
 
     // Validación: Tamaño máximo 2MB
     const maxSize = 2 * 1024 * 1024; // 2MB
     if (file.size > maxSize) {
-      alert('La imagen debe ser menor a 2MB');
+      setValidationError('Logo debe ser menor a 2MB');
+      setTimeout(() => setValidationError(null), 3000);
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setInvoice((prev) => ({
-        ...prev,
-        emitterLogo: reader.result as string,
-      }));
+    // Validación: Dimensiones mínimas (al menos 100x100)
+    const img = new Image();
+    img.onload = () => {
+      if (img.width < 100 || img.height < 100) {
+        setValidationError('Logo debe tener al menos 100x100 px');
+        setTimeout(() => setValidationError(null), 3000);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        setInvoice((prev) => ({
+          ...prev,
+          emitterLogo: reader.result as string,
+        }));
+      };
+      reader.onerror = () => {
+        setValidationError('Error al cargar el archivo');
+        setTimeout(() => setValidationError(null), 3000);
+      };
+      reader.readAsDataURL(file);
     };
-    reader.readAsDataURL(file);
+    img.onerror = () => {
+      setValidationError('Archivo de imagen corrupto');
+      setTimeout(() => setValidationError(null), 3000);
+    };
+    img.src = URL.createObjectURL(file);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
