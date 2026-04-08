@@ -42,7 +42,10 @@ export default function NuevaFacturaPage() {
         </div>
         {showPreview && (
           <div className="sticky bottom-0 bg-surface-container-low pt-4 border-t border-surface-container-highest">
-            <DownloadPDFButton invoiceNumber={invoiceData.invoiceNumber} />
+            <DownloadPDFButton 
+              invoiceNumber={invoiceData.invoiceNumber} 
+              invoiceData={invoiceData}
+            />
           </div>
         )}
       </div>
@@ -63,7 +66,10 @@ export default function NuevaFacturaPage() {
               </div>
             </div>
             <div className="sticky bottom-0 bg-surface-container-low pt-4 pb-4">
-              <DownloadPDFButton invoiceNumber={invoiceData.invoiceNumber} />
+              <DownloadPDFButton 
+                invoiceNumber={invoiceData.invoiceNumber}
+                invoiceData={invoiceData}
+              />
             </div>
           </div>
         </div>

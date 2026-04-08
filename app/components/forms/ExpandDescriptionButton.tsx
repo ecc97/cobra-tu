@@ -32,12 +32,22 @@ export function ExpandDescriptionButton({
         body: JSON.stringify({ description: currentDescription }),
       });
 
-      if (!response.ok) throw new Error('Error en la IA');
+      if (!response.ok) {
+        if (response.status === 429) {
+          setError('Límite de solicitudes. Intenta en unos minutos');
+        } else if (response.status === 400) {
+          setError('Descripción vacía. Intenta de nuevo');
+        } else {
+          setError('Error al mejorar. Intenta de nuevo');
+        }
+        return;
+      }
 
       const data = await response.json();
       onDescriptionUpdated(data.expandedDescription);
+      setError(null);
     } catch (err) {
-      setError('Error al mejorar la descripción');
+      setError('Error de conexión. Verifica tu internet');
       console.error(err);
     } finally {
       setIsLoading(false);

@@ -39,9 +39,24 @@ interface InvoiceFormProps {
 
 export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
   const [invoice, setInvoice] = useState<InvoiceData>(DEFAULT_INVOICE);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  const validateForm = (): string | null => {
+    if (!invoice.emitterName.trim()) return 'Completa tu nombre o empresa';
+    if (!invoice.receiverName.trim()) return 'Completa el nombre del cliente';
+    if (!invoice.invoiceNumber.trim()) return 'Agrega un número de factura';
+    
+    const hasValidItems = invoice.items.some(
+      (item) => item.description.trim() && item.price > 0
+    );
+    if (!hasValidItems) return 'Al menos un servicio debe tener descripción y precio';
+    
+    return null;
+  };
 
   const updateEmitter = (field: keyof InvoiceData, value: any) => {
     setInvoice((prev) => ({ ...prev, [field]: value }));
+    setValidationError(null);
   };
 
   const updateReceiver = (field: string, value: string) => {
@@ -49,6 +64,7 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
       ...prev,
       [`receiver${field.charAt(0).toUpperCase()}${field.slice(1)}`]: value,
     } as any));
+    setValidationError(null);
   };
 
   const updateItem = (itemId: string, field: keyof InvoiceItem, value: any) => {
@@ -58,6 +74,7 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
         item.id === itemId ? { ...item, [field]: value } : item
       ),
     }));
+    setValidationError(null);
   };
 
   const addItem = () => {
@@ -108,6 +125,14 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const error = validateForm();
+    if (error) {
+      setValidationError(error);
+      return;
+    }
+    
+    setValidationError(null);
     onSubmit?.(invoice);
   };
 
@@ -343,6 +368,12 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
           className="w-full px-3 sm:px-4 py-2 rounded bg-surface-container text-on-surface placeholder:text-on-surface/50 resize-none text-sm sm:text-base"
         />
       </section>
+
+      {validationError && (
+        <div className="p-3 sm:p-4 rounded bg-error/10 border border-error/30 text-error text-xs sm:text-sm">
+          ⚠️ {validationError}
+        </div>
+      )}
 
       <button
         type="submit"
