@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Toast } from '@/components/ui/Toast';
 
 interface ExpandDescriptionButtonProps {
   currentDescription: string;
@@ -15,6 +16,7 @@ export function ExpandDescriptionButton({
 }: ExpandDescriptionButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   const handleExpand = async () => {
     if (!currentDescription.trim()) {
@@ -46,6 +48,7 @@ export function ExpandDescriptionButton({
       const data = await response.json();
       onDescriptionUpdated(data.expandedDescription);
       setError(null);
+      setShowSuccessToast(true);
     } catch (err) {
       setError('Error de conexión. Verifica tu internet');
       console.error(err);
@@ -63,9 +66,25 @@ export function ExpandDescriptionButton({
         title="Mejorar con IA"
         className="px-3 py-2 rounded bg-secondary text-black text-sm font-semibold hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        {isLoading ? '✨ ...' : '✨ Mejorar'}
+        {isLoading ? (
+          <>
+            <span className="inline-block animate-spin mr-1">✨</span>
+            ...
+          </>
+        ) : (
+          <>
+            ✨ Mejorar
+          </>
+        )}
       </button>
       {error && <span className="text-error text-xs self-center">{error}</span>}
+      {showSuccessToast && (
+        <Toast 
+          message="Descripción mejorada" 
+          type="success"
+          onClose={() => setShowSuccessToast(false)}
+        />
+      )}
     </div>
   );
 }

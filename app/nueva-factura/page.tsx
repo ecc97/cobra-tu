@@ -52,8 +52,8 @@ export default function NuevaFacturaPage() {
 
       {/* Mobile - Preview Modal */}
       {showPreview && (
-        <div className="md:hidden fixed inset-0 bg-black/50 z-50 overflow-y-auto">
-          <div className="bg-surface-container-low p-4 min-h-screen pb-20">
+        <div className="md:hidden fixed inset-0 bg-black/50 z-50 overflow-y-auto animate-in fade-in duration-200">
+          <div className="bg-surface-container-low p-4 min-h-screen pb-20 animate-in slide-in-from-bottom-4 duration-300">
             <div className="mb-6">
               <button
                 onClick={() => setShowPreview(false)}

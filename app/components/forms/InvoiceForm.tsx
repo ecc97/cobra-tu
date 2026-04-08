@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { InvoiceData, InvoiceItem } from '@/types/invoice';
 import { SUPPORTED_CURRENCIES } from '@/lib/calculations';
 import { ExpandDescriptionButton } from './ExpandDescriptionButton';
+import { Toast } from '@/components/ui/Toast';
 
 const DEFAULT_INVOICE: InvoiceData = {
   emitterName: '',
@@ -40,6 +41,7 @@ interface InvoiceFormProps {
 export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
   const [invoice, setInvoice] = useState<InvoiceData>(DEFAULT_INVOICE);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [showAddItemFeedback, setShowAddItemFeedback] = useState(false);
 
   const validateForm = (): string | null => {
     if (!invoice.emitterName.trim()) return 'Completa tu nombre o empresa';
@@ -85,6 +87,8 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
       price: 0,
     };
     setInvoice((prev) => ({ ...prev, items: [...prev.items, newItem] }));
+    setShowAddItemFeedback(true);
+    setTimeout(() => setShowAddItemFeedback(false), 2000);
   };
 
   const removeItem = (itemId: string) => {
@@ -355,6 +359,13 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
         >
           + Agregar Servicio
         </button>
+        {showAddItemFeedback && (
+          <Toast 
+            message="Nuevo servicio agregado" 
+            type="success"
+            duration={1500}
+          />
+        )}
       </section>
 
       {/* NOTAS */}

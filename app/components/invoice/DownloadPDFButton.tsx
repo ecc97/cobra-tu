@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { generatePDFFromElement } from '@/lib/pdf';
 import { InvoiceData } from '@/types/invoice';
+import { Toast } from '@/components/ui/Toast';
 
 interface DownloadPDFButtonProps {
   invoiceNumber?: string;
@@ -17,6 +18,7 @@ export function DownloadPDFButton({
 }: DownloadPDFButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   // Validar que la factura tenga datos mínimos
   const isValidInvoice = invoiceData && 
@@ -37,6 +39,7 @@ export function DownloadPDFButton({
       const fileName = `factura-${invoiceNumber}-${new Date().getTime()}.pdf`;
       await generatePDFFromElement('invoice-paper', fileName);
       setError(null);
+      setShowSuccessToast(true);
     } catch (err) {
       setError('Error al descargar el PDF. Intenta de nuevo.');
       console.error(err);
@@ -53,9 +56,25 @@ export function DownloadPDFButton({
         title={!isValidInvoice ? 'Completa los datos principales' : ''}
         className="w-full px-6 py-3 rounded bg-secondary text-black font-semibold hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
       >
-        {isLoading ? '⏳ Descargando...' : '📥 Descargar PDF'}
+        {isLoading ? (
+          <>
+            <span className="inline-block animate-spin">⏳</span>
+            Descargando...
+          </>
+        ) : (
+          <>
+            📥 Descargar PDF
+          </>
+        )}
       </button>
       {error && <p className="text-error text-xs sm:text-sm">{error}</p>}
+      {showSuccessToast && (
+        <Toast 
+          message="Factura descargada exitosamente" 
+          type="success"
+          onClose={() => setShowSuccessToast(false)}
+        />
+      )}
     </div>
   );
 }
