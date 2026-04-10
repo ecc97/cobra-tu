@@ -48,13 +48,17 @@ export function ExpandDescriptionButton({
 
       if (!response.ok) {
         if (response.status === 429) {
-          setError('Límite diario alcanzado. Intenta mañana');
+          setError('Límite de solicitudes. Intenta en unos minutos');
         } else if (response.status === 400) {
           setError('Descripción vacía o inválida');
+        } else if (response.status === 401 || response.status === 403) {
+          setError('API key inválida. Configura una nueva');
+        } else if (response.status === 503) {
+          setError('Servicio no disponible. Intenta luego');
         } else if (response.status === 500) {
           setError('Error del servidor. Intenta de nuevo');
         } else {
-          setError('No se pudo mejorar. Intenta de nuevo');
+          setError(`Error ${response.status}. Intenta de nuevo`);
         }
         return;
       }
@@ -70,9 +74,11 @@ export function ExpandDescriptionButton({
       setShowSuccessToast(true);
     } catch (err: any) {
       if (err.name === 'AbortError') {
-        setError('Solicitud tardó mucho. Intenta de nuevo');
+        setError('Solicitud tardó mucho (timeout)');
+      } else if (err instanceof TypeError && err.message.includes('fetch')) {
+        setError('Error de red. Verifica tu conexión');
       } else if (err instanceof TypeError) {
-        setError('Error de conexión. Revisa tu internet');
+        setError('Error de conexión. Intenta de nuevo');
       } else {
         setError('Error inesperado. Intenta de nuevo');
       }
