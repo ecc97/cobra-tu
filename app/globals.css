@@ -12,17 +12,53 @@
     --surface-container-high: #282a2f;
     --surface-container-highest: #33353a;
     --on-surface: #e2e2e9;
-    
+    --on-surface-high: #C7C4D7;
+
     --primary: #c0c1ff;
     --primary-container: #8083ff;
     --on-primary: #1000a9;
-    
+
     --secondary: #4ede63;
     --secondary-container: #00a572;
     --on-secondary: #003824;
-    
+
     --error: #ffb4ab;
     --on-error: #690005;
+  }
+
+  @theme inline {
+    --color-primary: var(--primary);
+    --color-primary-container: var(--primary-container);
+    --color-on-primary: var(--on-primary);
+    --color-secondary: var(--secondary);
+    --color-secondary-container: var(--secondary-container);
+    --color-on-secondary: var(--on-secondary);
+    --color-error: var(--error);
+    --color-on-error: var(--on-error);
+    --color-surface: var(--surface);
+    --color-surface-dim: var(--surface-dim);
+    --color-surface-bright: var(--surface-bright);
+    --color-surface-container: var(--surface-container);
+    --color-surface-container-low: var(--surface-container-low);
+    --color-surface-container-lowest: var(--surface-container-lowest);
+    --color-surface-container-high: var(--surface-container-high);
+    --color-surface-container-highest: var(--surface-container-highest);
+    --color-on-surface: var(--on-surface);
+    --color-on-surface-high: var(--on-surface-high);
+
+    --font-display: 'Playfair Display', serif;
+    --font-headline: 'Playfair Display', serif;
+    --font-body: 'Inter', sans-serif;
+    --font-sans: 'Inter', sans-serif;
+    --font-mono: 'DM Sans', monospace;
+
+    --fontSize-display-lg: 3.5rem;
+    --fontSize-headline-md: 1.75rem;
+    --fontSize-title-md: 1.125rem;
+    --fontSize-body-md: 0.875rem;
+
+    --blur-glass: 20px;
+    --shadow-paper: 0 4px 6px rgba(0, 0, 0, 0.3), 0 10px 40px rgba(0, 0, 0, 0.4), 0 2px 80px rgba(0, 0, 0, 0.2);
   }
 
   body {
@@ -31,7 +67,12 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: 'Playfair Display', serif;
   }
 }
@@ -41,10 +82,28 @@
   background-color: #ffffff;
   color: #000000;
   border-radius: 4px;
-  box-shadow: 
+  box-shadow:
     0 4px 6px rgba(0, 0, 0, 0.3),
     0 10px 40px rgba(0, 0, 0, 0.4),
     0 2px 80px rgba(0, 0, 0, 0.2);
+}
+
+/* Material Symbols */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  display: inline-flex;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
 }
 
 /* Surface shifts - no borders */
