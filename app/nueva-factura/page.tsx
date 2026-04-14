@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { InvoiceForm } from '@/components/forms/InvoiceForm';
 import { InvoicePreview } from '@/components/invoice/InvoicePreview';
 import { DownloadPDFButton } from '@/components/invoice/DownloadPDFButton';
@@ -8,13 +8,37 @@ import { InvoiceData } from '@/types/invoice';
 import { DEFAULT_INVOICE } from '@/lib/constants';
 
 export default function NuevaFacturaPage() {
-  const [invoiceData, setInvoiceData] = useState<InvoiceData>(DEFAULT_INVOICE);
+  const [invoiceData, setInvoiceData] = useState<InvoiceData>(() => {
+    if (typeof window === 'undefined') {
+      return DEFAULT_INVOICE;
+    }
+
+    const raw = localStorage.getItem('lastInvoice');
+    if (!raw) {
+      return DEFAULT_INVOICE;
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as Partial<InvoiceData>;
+      const safeItems = Array.isArray(parsed.items) && parsed.items.length > 0
+        ? parsed.items
+        : DEFAULT_INVOICE.items;
+
+      return {
+        ...DEFAULT_INVOICE,
+        ...parsed,
+        items: safeItems,
+      };
+    } catch {
+      return DEFAULT_INVOICE;
+    }
+  });
   const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
 
-  const handleInvoiceChange = (data: InvoiceData) => {
+  const handleInvoiceChange = useCallback((data: InvoiceData) => {
     setInvoiceData(data);
     localStorage.setItem('lastInvoice', JSON.stringify(data));
-  };
+  }, []);
 
   return (
     <div className="h-screen bg-surface overflow-hidden">
@@ -30,7 +54,7 @@ export default function NuevaFacturaPage() {
             fullWidth={false}
             icon="↓"
             label="Descargar PDF"
-            containerClassName="min-w-[180px]"
+            containerClassName="min-w-45"
             buttonClassName="px-4 py-2 text-sm rounded-lg bg-primary text-on-primary"
           />
         </div>

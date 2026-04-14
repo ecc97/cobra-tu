@@ -13,236 +13,119 @@ export function InvoicePreview({ data }: InvoicePreviewProps) {
     data.taxRate
   );
   const currencySymbol = CURRENCY_SYMBOLS[data.currency] || '$';
+  const issueDate = new Date(data.issueDate).toLocaleDateString('es-ES');
+  const dueDate = new Date(data.dueDate).toLocaleDateString('es-ES');
+
+  const emitterName = data.emitterName || 'Nombre Empresa';
+  const receiverName = data.receiverName || 'Cliente';
 
   return (
     <div
       id="invoice-paper"
-      style={{
-        backgroundColor: '#ffffff',
-        color: '#000000',
-        padding: '2rem',
-        maxWidth: '42rem',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        borderRadius: '0.25rem',
-        boxShadow:
-          '0 4px 6px rgba(0, 0, 0, 0.3), 0 10px 40px rgba(0, 0, 0, 0.4), 0 2px 80px rgba(0, 0, 0, 0.2)',
-      }}
+      className="w-full max-w-130 bg-white text-[#111827] paper-shadow rounded-sm min-h-184 p-12 flex flex-col"
     >
-      {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          marginBottom: '2rem',
-        }}
-      >
-        <div>
-          {data.emitterLogo && (
-            <img
-              src={data.emitterLogo}
-              alt="Logo"
-              style={{
-                height: '4rem',
-                objectFit: 'contain',
-                marginBottom: '1rem',
-              }}
-            />
-          )}
-          <h1 style={{ fontSize: '1.875rem', fontWeight: 'bold', margin: 0 }}>
-            {data.emitterName || 'Tu Empresa'}
-          </h1>
+      <div className="flex justify-between items-start mb-16">
+        <div className="space-y-4">
+          <div className="w-16 h-16 bg-gray-50 border border-gray-100 rounded flex items-center justify-center overflow-hidden">
+            {data.emitterLogo ? (
+              <img src={data.emitterLogo} alt="Logo" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-[10px] text-gray-300">LOGO</span>
+            )}
+          </div>
+
+          <div className="space-y-1">
+            <h3 className="font-headline text-[22px] font-bold leading-tight text-[#111827]">
+              {emitterName}
+            </h3>
+            <p className="text-[10px] text-gray-400">{data.emitterEmail || 'empresa@email.com'}</p>
+            <p className="text-[10px] text-gray-400">{data.emitterAddress || 'Calle Principal #123, Ciudad'}</p>
+          </div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <p style={{ fontSize: '2.25rem', fontWeight: 'bold', margin: '0 0 0.5rem 0' }}>
-            FACTURA
-          </p>
-          <p style={{ color: '#4b5563', margin: 0 }}>
-            #{data.invoiceNumber.padStart(3, '0')}
-          </p>
+
+        <div className="text-right space-y-1">
+          <h1 className="font-headline text-[46px] font-bold leading-none text-primary mb-4">FACTURA</h1>
+          <p className="text-[11px] font-bold">#{data.invoiceNumber.padStart(3, '0')}</p>
+          <p className="text-[10px] text-gray-500">Fecha: {issueDate}</p>
+          <p className="text-[10px] text-gray-500">Vencimiento: {dueDate}</p>
         </div>
       </div>
 
-      {/* Invoice Details */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '2rem',
-          marginBottom: '2rem',
-          fontSize: '0.875rem',
-        }}
-      >
-        <div>
-          <p style={{ fontWeight: 'bold', marginBottom: '0.5rem', color: '#000' }}>DE:</p>
-          <p style={{ color: '#4b5563', margin: '0.25rem 0' }}>{data.emitterName}</p>
-          {data.emitterEmail && (
-            <p style={{ color: '#6b7280', margin: '0.25rem 0' }}>{data.emitterEmail}</p>
-          )}
-          {data.emitterPhone && (
-            <p style={{ color: '#6b7280', margin: '0.25rem 0' }}>{data.emitterPhone}</p>
-          )}
-          {data.emitterAddress && (
-            <p style={{ color: '#6b7280', margin: '0.25rem 0' }}>{data.emitterAddress}</p>
-          )}
-          {data.emitterTaxId && (
-            <p style={{ color: '#6b7280', margin: '0.25rem 0' }}>RFC: {data.emitterTaxId}</p>
-          )}
+      <div className="grid grid-cols-2 gap-12 mb-16">
+        <div className="space-y-3">
+          <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400">DE</span>
+          <div className="text-[11px] leading-relaxed">
+            <p className="font-bold">{emitterName}</p>
+            <p className="text-gray-500">{data.emitterAddress || 'Workspace Premium, 45B'}</p>
+            <p className="text-gray-500">{data.emitterTaxId ? `NIT: ${data.emitterTaxId}` : 'NIT: 900.123.456-1'}</p>
+          </div>
         </div>
-        <div>
-          <p style={{ fontWeight: 'bold', marginBottom: '0.5rem', color: '#000' }}>PARA:</p>
-          <p style={{ color: '#4b5563', margin: '0.25rem 0' }}>{data.receiverName}</p>
-          {data.receiverEmail && (
-            <p style={{ color: '#6b7280', margin: '0.25rem 0' }}>{data.receiverEmail}</p>
-          )}
-          {data.receiverAddress && (
-            <p style={{ color: '#6b7280', margin: '0.25rem 0' }}>{data.receiverAddress}</p>
-          )}
-          {data.receiverTaxId && (
-            <p style={{ color: '#6b7280', margin: '0.25rem 0' }}>RFC: {data.receiverTaxId}</p>
-          )}
+
+        <div className="space-y-3">
+          <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400">COBRAR A</span>
+          <div className="text-[11px] leading-relaxed">
+            <p className="font-bold">{receiverName}</p>
+            <p className="text-gray-500">{data.receiverEmail || 'cliente@ejemplo.com'}</p>
+            <p className="text-gray-500">{data.receiverAddress || 'Avenida Libertador #99'}</p>
+          </div>
         </div>
       </div>
 
-      {/* Dates */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '1rem',
-          marginBottom: '2rem',
-          fontSize: '0.875rem',
-          borderTop: '1px solid #d1d5db',
-          borderBottom: '1px solid #d1d5db',
-          padding: '1rem 0',
-        }}
-      >
-        <div>
-          <p style={{ color: '#6b7280', margin: 0 }}>Fecha de Emisión</p>
-          <p style={{ fontWeight: 'bold', color: '#000', margin: 0 }}>
-            {new Date(data.issueDate).toLocaleDateString('es-ES')}
-          </p>
-        </div>
-        <div>
-          <p style={{ color: '#6b7280', margin: 0 }}>Fecha de Vencimiento</p>
-          <p style={{ fontWeight: 'bold', color: '#000', margin: 0 }}>
-            {new Date(data.dueDate).toLocaleDateString('es-ES')}
-          </p>
-        </div>
-      </div>
-
-      {/* Items Table */}
-      <table
-        style={{
-          width: '100%',
-          marginBottom: '2rem',
-          fontSize: '0.875rem',
-          borderCollapse: 'collapse',
-        }}
-      >
-        <thead>
-          <tr style={{ borderBottom: '2px solid #1f2937' }}>
-            <th style={{ textAlign: 'left', padding: '0.75rem 0', color: '#000', fontWeight: 'bold' }}>
-              Descripción
-            </th>
-            <th style={{ textAlign: 'right', padding: '0.75rem 0', color: '#000', fontWeight: 'bold', width: '5rem' }}>
-              Cantidad
-            </th>
-            <th style={{ textAlign: 'right', padding: '0.75rem 0', color: '#000', fontWeight: 'bold', width: '6rem' }}>
-              Precio
-            </th>
-            <th style={{ textAlign: 'right', padding: '0.75rem 0', color: '#000', fontWeight: 'bold', width: '6rem' }}>
-              Total
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.items.map((item) => (
-            <tr
-              key={item.id}
-              style={{ borderBottom: '1px solid #e5e7eb' }}
-            >
-              <td style={{ padding: '0.75rem 0', color: '#4b5563' }}>
-                {item.description}
-              </td>
-              <td style={{ textAlign: 'right', padding: '0.75rem 0', color: '#4b5563' }}>
-                {item.quantity}
-              </td>
-              <td style={{ textAlign: 'right', padding: '0.75rem 0', color: '#4b5563' }}>
-                {currencySymbol}
-                {item.price.toFixed(2)}
-              </td>
-              <td style={{ textAlign: 'right', padding: '0.75rem 0', color: '#000', fontWeight: 'bold' }}>
-                {currencySymbol}
-                {(item.quantity * item.price).toFixed(2)}
-              </td>
+      <div className="flex-1">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="border-b border-gray-100">
+              <th className="text-left py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 w-1/2">Descripción</th>
+              <th className="text-center py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">Cant.</th>
+              <th className="text-right py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">Precio</th>
+              <th className="text-right py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">Total</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
 
-      {/* Totals */}
-      <div style={{ marginLeft: 'auto', width: '20rem', marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', fontSize: '0.875rem' }}>
-          <span style={{ color: '#4b5563' }}>Subtotal:</span>
-          <span style={{ color: '#000', fontWeight: 'bold' }}>
-            {currencySymbol}
-            {subtotal.toFixed(2)}
-          </span>
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            padding: '0.5rem 0',
-            fontSize: '0.875rem',
-            borderBottom: '1px solid #d1d5db',
-          }}
-        >
-          <span style={{ color: '#4b5563' }}>
-            IVA ({(data.taxRate * 100).toFixed(0)}%):
-          </span>
-          <span style={{ color: '#000', fontWeight: 'bold' }}>
-            {currencySymbol}
-            {taxAmount.toFixed(2)}
-          </span>
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            padding: '0.75rem 0',
-            fontSize: '1.125rem',
-            borderTop: '2px solid #000',
-          }}
-        >
-          <span style={{ color: '#000', fontWeight: 'bold' }}>TOTAL:</span>
-          <span style={{ color: '#000', fontWeight: 'bold' }}>
-            {currencySymbol}
-            {total.toFixed(2)}
-          </span>
+          <tbody className="text-[11px]">
+            {data.items.map((item, index) => (
+              <tr key={item.id} className={index % 2 === 1 ? 'bg-gray-50/30' : ''}>
+                <td className="py-5 pr-4 border-b border-gray-50">
+                  <p className="font-medium text-[#111827]">{item.description || 'Servicio profesional'}</p>
+                  <p className="text-[10px] text-gray-400 mt-1">Línea de servicio facturable</p>
+                </td>
+                <td className="py-5 text-center border-b border-gray-50">{item.quantity}</td>
+                <td className="py-5 text-right border-b border-gray-50">
+                  {currencySymbol}{item.price.toFixed(2)}
+                </td>
+                <td className="py-5 text-right font-bold border-b border-gray-50">
+                  {currencySymbol}{(item.quantity * item.price).toFixed(2)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="mt-12 pt-8 border-t-2 border-gray-100 flex justify-end">
+        <div className="w-1/2 space-y-3">
+          <div className="flex justify-between text-[11px] text-gray-500 px-1">
+            <span>Subtotal</span>
+            <span>{currencySymbol}{subtotal.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between text-[11px] text-gray-500 px-1">
+            <span>Impuestos ({(data.taxRate * 100).toFixed(0)}%)</span>
+            <span>{currencySymbol}{taxAmount.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between items-center bg-[#111827] text-white p-4 rounded mt-4">
+            <span className="text-[10px] font-bold uppercase tracking-widest">Total</span>
+            <span className="text-[30px] font-bold leading-none">{currencySymbol}{total.toFixed(2)}</span>
+          </div>
         </div>
       </div>
 
-      {/* Notes */}
-      {data.notes && (
-        <div
-          style={{
-            fontSize: '0.875rem',
-            color: '#4b5563',
-            borderTop: '1px solid #d1d5db',
-            paddingTop: '1rem',
-            marginTop: 'auto',
-          }}
-        >
-          <p style={{ fontWeight: 'bold', color: '#000', marginBottom: '0.5rem' }}>Notas:</p>
-          <p style={{ margin: 0 }}>{data.notes}</p>
-        </div>
-      )}
+      <footer className="mt-20 pt-8 border-t border-gray-100 text-center">
+        {data.notes ? (
+          <p className="text-[10px] text-gray-400 italic">{data.notes}</p>
+        ) : (
+          <p className="text-[10px] text-gray-300 italic">Gracias por confiar en nosotros</p>
+        )}
+      </footer>
     </div>
   );
 }
