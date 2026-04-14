@@ -25,5 +25,5 @@ export const DEFAULT_INVOICE: InvoiceData = {
   ],
 
   currency: 'USD',
-  taxRate: 0.19,
+  taxRate: 0,
 };

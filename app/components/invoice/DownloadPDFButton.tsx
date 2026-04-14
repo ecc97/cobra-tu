@@ -9,12 +9,22 @@ interface DownloadPDFButtonProps {
   invoiceNumber?: string;
   invoiceData?: InvoiceData;
   disabled?: boolean;
+  label?: string;
+  icon?: string;
+  fullWidth?: boolean;
+  buttonClassName?: string;
+  containerClassName?: string;
 }
 
 export function DownloadPDFButton({
   invoiceNumber = '001',
   invoiceData,
   disabled = false,
+  label = 'Descargar PDF',
+  icon = '📥',
+  fullWidth = true,
+  buttonClassName = '',
+  containerClassName = '',
 }: DownloadPDFButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,12 +86,12 @@ export function DownloadPDFButton({
   };
 
   return (
-    <div className="space-y-2">
+    <div className={`space-y-2 ${containerClassName}`}>
       <button
         onClick={handleDownload}
         disabled={disabled || isLoading || !isValidInvoice}
         title={!isValidInvoice ? 'Completa los datos principales' : ''}
-        className="w-full px-6 py-3 rounded bg-secondary text-black font-semibold hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+        className={`${fullWidth ? 'w-full' : ''} px-6 py-3 rounded bg-secondary text-black font-semibold hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 ${buttonClassName}`}
       >
         {isLoading ? (
           <>
@@ -90,7 +100,7 @@ export function DownloadPDFButton({
           </>
         ) : (
           <>
-            📥 Descargar PDF
+            <span>{icon}</span> {label}
           </>
         )}
       </button>

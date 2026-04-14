@@ -9,71 +9,77 @@ import { DEFAULT_INVOICE } from '@/lib/constants';
 
 export default function NuevaFacturaPage() {
   const [invoiceData, setInvoiceData] = useState<InvoiceData>(DEFAULT_INVOICE);
-  const [showPreview, setShowPreview] = useState(false);
+  const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
 
-  const handleFormSubmit = (data: InvoiceData) => {
+  const handleInvoiceChange = (data: InvoiceData) => {
     setInvoiceData(data);
-    setShowPreview(true);
-    // Save to localStorage
     localStorage.setItem('lastInvoice', JSON.stringify(data));
   };
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col md:flex-row">
-      {/* Form Panel - Left */}
-      <div className="w-full md:w-1/2 p-4 sm:p-6 md:p-8 overflow-y-auto">
-        <div className="max-w-lg mx-auto md:mx-0">
-          <h1 className="text-2xl sm:text-3xl font-bold text-primary mb-1 sm:mb-2">
-            Nueva Factura
-          </h1>
-          <p className="text-sm sm:text-base text-on-surface/70 mb-6 sm:mb-8">
-            Llena los datos y tu factura se actualizará en tiempo real.
-          </p>
-          <InvoiceForm onSubmit={handleFormSubmit} />
+    <div className="h-screen bg-surface overflow-hidden">
+      <nav className="fixed top-0 left-0 right-0 z-50 h-13 bg-surface-container-lowest border-b border-outline-variant/20 px-4 sm:px-6">
+        <div className="h-full max-w-400 mx-auto flex items-center justify-between gap-4">
+          <span className="text-2xl font-display font-semibold text-white">InvoiceFlow</span>
+          <span className="hidden md:block text-primary font-bold text-sm tracking-widest">
+            Factura #{invoiceData.invoiceNumber.padStart(3, '0')}
+          </span>
+          <DownloadPDFButton
+            invoiceNumber={invoiceData.invoiceNumber}
+            invoiceData={invoiceData}
+            fullWidth={false}
+            icon="↓"
+            label="Descargar PDF"
+            containerClassName="min-w-[180px]"
+            buttonClassName="px-4 py-2 text-sm rounded-lg bg-primary text-on-primary"
+          />
         </div>
-      </div>
+      </nav>
 
-      {/* Preview Panel - Right */}
-      <div
-        className={`hidden md:flex md:w-1/2 bg-surface-container-low p-8 overflow-y-auto flex-col`}
-      >
-        <div className="flex-1 mb-6">
-          <InvoicePreview data={invoiceData} />
-        </div>
-        {showPreview && (
-          <div className="sticky bottom-0 bg-surface-container-low pt-4 border-t border-surface-container-highest">
-            <DownloadPDFButton 
-              invoiceNumber={invoiceData.invoiceNumber} 
-              invoiceData={invoiceData}
+      <main className="pt-13 h-screen flex flex-col md:flex-row overflow-hidden">
+        <aside className="w-full md:w-[42%] bg-surface-container overflow-y-auto h-full pb-24 md:pb-6">
+          <div className="p-4 sm:p-6 md:p-8 max-w-3xl">
+            <InvoiceForm
+              initialData={invoiceData}
+              onChange={handleInvoiceChange}
+              showSubmitButton={false}
             />
           </div>
-        )}
-      </div>
+        </aside>
 
-      {/* Mobile - Preview Modal */}
-      {showPreview && (
-        <div className="md:hidden fixed inset-0 bg-black/50 z-50 overflow-y-auto animate-in fade-in duration-200">
-          <div className="bg-surface-container-low p-4 min-h-screen pb-20 animate-in slide-in-from-bottom-4 duration-300">
-            <div className="mb-6">
-              <button
-                onClick={() => setShowPreview(false)}
-                className="mb-4 px-4 py-2 rounded bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors text-sm sm:text-base"
-              >
-                ← Volver
-              </button>
-              <div style={{ transform: 'scale(0.75)', transformOrigin: 'top left', width: '133.33%', marginLeft: '-8.33%' }}>
+        <section className="hidden md:flex md:w-[58%] bg-surface-container-low h-full overflow-y-auto p-8 lg:p-10 items-start justify-center">
+          <div className="w-full max-w-190">
+            <InvoicePreview data={invoiceData} />
+          </div>
+        </section>
+
+        {isMobilePreviewOpen && (
+          <div className="md:hidden fixed inset-0 z-50 bg-black/65">
+            <div className="h-full overflow-y-auto bg-surface-container-low p-3">
+              <div className="sticky top-0 z-10 mb-3 bg-surface-container-low/95 backdrop-blur-sm py-2">
+                <button
+                  onClick={() => setIsMobilePreviewOpen(false)}
+                  className="px-4 py-2 rounded bg-surface-container-high text-on-surface text-sm"
+                >
+                  Volver al formulario
+                </button>
+              </div>
+              <div className="scale-[0.74] origin-top-left w-[135%] -ml-[8%] pb-8">
                 <InvoicePreview data={invoiceData} />
               </div>
             </div>
-            <div className="sticky bottom-0 bg-surface-container-low pt-4 pb-4">
-              <DownloadPDFButton 
-                invoiceNumber={invoiceData.invoiceNumber}
-                invoiceData={invoiceData}
-              />
-            </div>
           </div>
+        )}
+
+        <div className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40">
+          <button
+            onClick={() => setIsMobilePreviewOpen(true)}
+            className="bg-surface-container-lowest text-primary border border-primary/25 px-7 py-3 rounded-2xl shadow-2xl font-semibold tracking-wider"
+          >
+            Ver Factura
+          </button>
         </div>
-      )}
+      </main>
     </div>
   );
 }

@@ -1,48 +1,33 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { InvoiceData, InvoiceItem } from '@/types/invoice';
 import { SUPPORTED_CURRENCIES } from '@/lib/calculations';
 import { validators } from '@/lib/validators';
+import { DEFAULT_INVOICE } from '@/lib/constants';
 import { ExpandDescriptionButton } from './ExpandDescriptionButton';
 import { Toast } from '@/components/ui/Toast';
 
-const DEFAULT_INVOICE: InvoiceData = {
-  emitterName: '',
-  emitterEmail: '',
-  emitterPhone: '',
-  emitterAddress: '',
-  emitterTaxId: '',
-  emitterLogo: undefined,
-
-  receiverName: '',
-  receiverEmail: '',
-  receiverAddress: '',
-  receiverTaxId: '',
-
-  invoiceNumber: '001',
-  issueDate: new Date().toISOString().split('T')[0],
-  dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .split('T')[0],
-  notes: '',
-
-  items: [
-    { id: '1', description: '', quantity: 1, price: 0 },
-  ],
-
-  currency: 'USD',
-  taxRate: 0.19,
-};
-
 interface InvoiceFormProps {
+  initialData?: InvoiceData;
+  onChange?: (data: InvoiceData) => void;
   onSubmit?: (data: InvoiceData) => void;
+  showSubmitButton?: boolean;
 }
 
-export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
-  const [invoice, setInvoice] = useState<InvoiceData>(DEFAULT_INVOICE);
+export function InvoiceForm({
+  initialData = DEFAULT_INVOICE,
+  onChange,
+  onSubmit,
+  showSubmitButton = true,
+}: InvoiceFormProps) {
+  const [invoice, setInvoice] = useState<InvoiceData>(initialData);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [showAddItemFeedback, setShowAddItemFeedback] = useState(false);
+
+  useEffect(() => {
+    onChange?.(invoice);
+  }, [invoice, onChange]);
 
   const validateForm = (): string | null => {
     // Validar nombre del emisor
@@ -376,7 +361,7 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
                   onChange={(e) =>
                     updateItem(item.id, 'description', e.target.value)
                   }
-                  className="flex-1 min-w-[120px] px-3 py-2 rounded bg-surface-container text-on-surface text-xs sm:text-sm placeholder:text-on-surface/50"
+                  className="flex-1 min-w-30 px-3 py-2 rounded bg-surface-container text-on-surface text-xs sm:text-sm placeholder:text-on-surface/50"
                 />
                 <input
                   type="number"
@@ -455,12 +440,14 @@ export function InvoiceForm({ onSubmit }: InvoiceFormProps) {
         </div>
       )}
 
-      <button
-        type="submit"
-        className="w-full px-4 sm:px-6 py-3 rounded bg-primary text-on-primary font-semibold hover:bg-primary-container transition-colors text-sm sm:text-base"
-      >
-        Ver Previsualización
-      </button>
+      {showSubmitButton && (
+        <button
+          type="submit"
+          className="w-full px-4 sm:px-6 py-3 rounded bg-primary text-on-primary font-semibold hover:bg-primary-container transition-colors text-sm sm:text-base"
+        >
+          Ver Previsualización
+        </button>
+      )}
     </form>
   );
 }
