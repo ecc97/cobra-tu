@@ -13,6 +13,7 @@ interface InvoiceFormProps {
   onChange?: (data: InvoiceData) => void;
   onSubmit?: (data: InvoiceData) => void;
   showSubmitButton?: boolean;
+  onAiLoadingChange?: (isLoading: boolean) => void;
 }
 
 export function InvoiceForm({
@@ -20,6 +21,7 @@ export function InvoiceForm({
   onChange,
   onSubmit,
   showSubmitButton = true,
+  onAiLoadingChange,
 }: InvoiceFormProps) {
   const [invoice, setInvoice] = useState<InvoiceData>(initialData);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -218,14 +220,14 @@ export function InvoiceForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      <section className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
+      <section className="space-y-4 sm:space-y-5">
         <div className="flex items-center justify-between">
-          <h2 className="text-primary text-[1.9rem] leading-none tracking-tight font-display">TUS DATOS</h2>
+          <h2 className="text-primary text-[1.55rem] sm:text-[1.9rem] leading-none tracking-tight font-display">TUS DATOS</h2>
           <span className="material-symbols-outlined text-on-surface/45">expand_more</span>
         </div>
 
-        <div className="grid grid-cols-[100px_1fr] gap-4 items-start">
+        <div className="grid grid-cols-1 sm:grid-cols-[100px_1fr] gap-3 sm:gap-4 items-start">
           <label className="w-25 h-25 rounded-xl border-2 border-dashed border-surface-container-highest bg-surface-container-lowest hover:border-primary/60 cursor-pointer flex flex-col items-center justify-center text-on-surface/50 transition-colors overflow-hidden">
             {invoice.emitterLogo ? (
               <img src={invoice.emitterLogo} alt="Logo" className="w-full h-full object-cover" />
@@ -277,9 +279,9 @@ export function InvoiceForm({
         />
       </section>
 
-      <section className="space-y-5">
+      <section className="space-y-4 sm:space-y-5">
         <div className="flex items-center justify-between">
-          <h2 className="text-primary text-[1.9rem] leading-none tracking-tight font-display">COBRAR A</h2>
+          <h2 className="text-primary text-[1.55rem] sm:text-[1.9rem] leading-none tracking-tight font-display">COBRAR A</h2>
           <span className="material-symbols-outlined text-on-surface/45">expand_more</span>
         </div>
 
@@ -308,9 +310,9 @@ export function InvoiceForm({
         </div>
       </section>
 
-      <section className="space-y-5">
+      <section className="space-y-4 sm:space-y-5">
         <div className="flex items-center justify-between">
-          <h2 className="text-primary text-[1.9rem] leading-none tracking-tight font-display">DETALLES DE FACTURA</h2>
+          <h2 className="text-primary text-[1.55rem] sm:text-[1.9rem] leading-none tracking-tight font-display">DETALLES DE FACTURA</h2>
           <span className="material-symbols-outlined text-on-surface/45">expand_more</span>
         </div>
 
@@ -344,7 +346,7 @@ export function InvoiceForm({
                 key={curr}
                 type="button"
                 onClick={() => updateEmitter('currency', curr)}
-                className={`py-2 text-[11px] font-bold rounded-lg transition-colors ${
+                className={`py-2 text-[10px] sm:text-[11px] font-bold rounded-lg transition-colors ${
                   isActive
                     ? 'bg-primary text-on-primary'
                     : 'text-on-surface/65 hover:bg-white/5'
@@ -357,13 +359,13 @@ export function InvoiceForm({
         </div>
       </section>
 
-      <section className="space-y-5">
+      <section className="space-y-4 sm:space-y-5">
         <div className="flex items-center justify-between">
-          <h2 className="text-primary text-[1.9rem] leading-none tracking-tight font-display">LÍNEAS DE PRODUCTO</h2>
+          <h2 className="text-primary text-[1.55rem] sm:text-[1.9rem] leading-none tracking-tight font-display">LÍNEAS DE PRODUCTO</h2>
           <button
             type="button"
             onClick={addItem}
-            className="text-secondary text-base font-semibold inline-flex items-center gap-1.5 hover:brightness-110"
+            className="text-secondary text-sm sm:text-base font-semibold inline-flex items-center gap-1.5 hover:brightness-110"
           >
             <span className="material-symbols-outlined text-base">add_circle</span>
             Añadir ítem
@@ -386,6 +388,7 @@ export function InvoiceForm({
                     <ExpandDescriptionButton
                       currentDescription={item.description}
                       onDescriptionUpdated={(newDesc) => updateItem(item.id, 'description', newDesc)}
+                      onLoadingStateChange={onAiLoadingChange}
                     />
                   )}
                 </div>
@@ -445,9 +448,9 @@ export function InvoiceForm({
         )}
       </section>
 
-      <section className="space-y-5">
+      <section className="space-y-4 sm:space-y-5">
         <div className="flex items-center justify-between">
-          <h2 className="text-primary text-[1.9rem] leading-none tracking-tight font-display">NOTAS E IMPUESTOS</h2>
+          <h2 className="text-primary text-[1.55rem] sm:text-[1.9rem] leading-none tracking-tight font-display">NOTAS E IMPUESTOS</h2>
           <span className="material-symbols-outlined text-on-surface/45">expand_more</span>
         </div>
 

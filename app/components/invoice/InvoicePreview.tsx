@@ -22,9 +22,9 @@ export function InvoicePreview({ data }: InvoicePreviewProps) {
   return (
     <div
       id="invoice-paper"
-      className="w-full max-w-130 bg-white text-[#111827] paper-shadow rounded-sm min-h-184 p-12 flex flex-col"
+      className="w-full max-w-130 bg-white text-[#111827] paper-shadow rounded-sm min-h-184 p-12 flex flex-col transform transition-transform hover:scale-[1.01] duration-500"
     >
-      <div className="flex justify-between items-start mb-16">
+      <div className="flex justify-between items-start mb-14">
         <div className="space-y-4">
           <div className="w-16 h-16 bg-gray-50 border border-gray-100 rounded flex items-center justify-center overflow-hidden">
             {data.emitterLogo ? (
@@ -44,14 +44,14 @@ export function InvoicePreview({ data }: InvoicePreviewProps) {
         </div>
 
         <div className="text-right space-y-1">
-          <h1 className="font-headline text-[46px] font-bold leading-none text-primary mb-4">FACTURA</h1>
+          <h1 className="font-headline text-[32px] font-bold leading-none text-primary mb-3">FACTURA</h1>
           <p className="text-[11px] font-bold">#{data.invoiceNumber.padStart(3, '0')}</p>
           <p className="text-[10px] text-gray-500">Fecha: {issueDate}</p>
           <p className="text-[10px] text-gray-500">Vencimiento: {dueDate}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-12 mb-16">
+      <div className="grid grid-cols-2 gap-12 mb-14">
         <div className="space-y-3">
           <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400">DE</span>
           <div className="text-[11px] leading-relaxed">
@@ -75,25 +75,25 @@ export function InvoicePreview({ data }: InvoicePreviewProps) {
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-gray-100">
-              <th className="text-left py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 w-1/2">Descripción</th>
-              <th className="text-center py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">Cant.</th>
-              <th className="text-right py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">Precio</th>
-              <th className="text-right py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">Total</th>
+              <th className="text-left py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-400 w-1/2">Descripción</th>
+              <th className="text-center py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">Cant.</th>
+              <th className="text-right py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">Precio</th>
+              <th className="text-right py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">Total</th>
             </tr>
           </thead>
 
           <tbody className="text-[11px]">
             {data.items.map((item, index) => (
               <tr key={item.id} className={index % 2 === 1 ? 'bg-gray-50/30' : ''}>
-                <td className="py-5 pr-4 border-b border-gray-50">
+                <td className="py-4.5 pr-4 border-b border-gray-50">
                   <p className="font-medium text-[#111827]">{item.description || 'Servicio profesional'}</p>
                   <p className="text-[10px] text-gray-400 mt-1">Línea de servicio facturable</p>
                 </td>
-                <td className="py-5 text-center border-b border-gray-50">{item.quantity}</td>
-                <td className="py-5 text-right border-b border-gray-50">
+                <td className="py-4.5 text-center border-b border-gray-50">{item.quantity}</td>
+                <td className="py-4.5 text-right border-b border-gray-50">
                   {currencySymbol}{item.price.toFixed(2)}
                 </td>
-                <td className="py-5 text-right font-bold border-b border-gray-50">
+                <td className="py-4.5 text-right font-bold border-b border-gray-50">
                   {currencySymbol}{(item.quantity * item.price).toFixed(2)}
                 </td>
               </tr>
@@ -102,8 +102,8 @@ export function InvoicePreview({ data }: InvoicePreviewProps) {
         </table>
       </div>
 
-      <div className="mt-12 pt-8 border-t-2 border-gray-100 flex justify-end">
-        <div className="w-1/2 space-y-3">
+      <div className="mt-10 pt-6 border-t-2 border-gray-100 flex justify-end">
+        <div className="w-[46%] min-w-48 space-y-2.5">
           <div className="flex justify-between text-[11px] text-gray-500 px-1">
             <span>Subtotal</span>
             <span>{currencySymbol}{subtotal.toFixed(2)}</span>
@@ -119,7 +119,7 @@ export function InvoicePreview({ data }: InvoicePreviewProps) {
         </div>
       </div>
 
-      <footer className="mt-20 pt-8 border-t border-gray-100 text-center">
+      <footer className="mt-14 pt-6 border-t border-gray-100 text-center">
         {data.notes ? (
           <p className="text-[10px] text-gray-400 italic">{data.notes}</p>
         ) : (

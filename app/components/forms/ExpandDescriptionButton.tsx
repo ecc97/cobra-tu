@@ -3,20 +3,31 @@
 import { useState } from 'react';
 import { Toast } from '@/components/ui/Toast';
 
+const IA_TIMEOUT_MS = 30000;
+
 interface ExpandDescriptionButtonProps {
   currentDescription: string;
   onDescriptionUpdated: (newDescription: string) => void;
   disabled?: boolean;
+  onLoadingStateChange?: (isLoading: boolean) => void;
 }
 
 export function ExpandDescriptionButton({
   currentDescription,
   onDescriptionUpdated,
   disabled = false,
+  onLoadingStateChange,
 }: ExpandDescriptionButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [errorToastMessage, setErrorToastMessage] = useState('');
+
+  const showTimeoutToast = () => {
+    setErrorToastMessage('La IA tardó más de 30s. Inténtalo de nuevo.');
+    setShowErrorToast(true);
+  };
 
   const handleExpand = async () => {
     if (!currentDescription.trim()) {
@@ -31,20 +42,19 @@ export function ExpandDescriptionButton({
 
     try {
       setIsLoading(true);
+      onLoadingStateChange?.(true);
       setError(null);
 
-      // Timeout de 10s para requests lentas
+      // Timeout ampliado para cuentas gratuitas con latencia variable.
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => controller.abort(), IA_TIMEOUT_MS);
 
       const response = await fetch('/api/expand-description', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ description: currentDescription }),
         signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
+      }).finally(() => clearTimeout(timeoutId));
 
       if (!response.ok) {
         if (response.status === 429) {
@@ -74,7 +84,8 @@ export function ExpandDescriptionButton({
       setShowSuccessToast(true);
     } catch (err: any) {
       if (err.name === 'AbortError') {
-        setError('Solicitud tardó mucho (timeout)');
+        setError('La solicitud tardó demasiado. Vuelve a intentarlo.');
+        showTimeoutToast();
       } else if (err instanceof TypeError && err.message.includes('fetch')) {
         setError('Error de red. Verifica tu conexión');
       } else if (err instanceof TypeError) {
@@ -85,11 +96,12 @@ export function ExpandDescriptionButton({
       console.error('Expand description error:', err);
     } finally {
       setIsLoading(false);
+      onLoadingStateChange?.(false);
     }
   };
 
   return (
-    <div className="flex gap-2">
+    <div className="relative flex items-center gap-2 flex-wrap">
       <button
         type="button"
         onClick={handleExpand}
@@ -108,12 +120,20 @@ export function ExpandDescriptionButton({
           </>
         )}
       </button>
+
       {error && <span className="text-error text-xs self-center">{error}</span>}
       {showSuccessToast && (
-        <Toast 
-          message="Descripción mejorada" 
+        <Toast
+          message="Descripción mejorada"
           type="success"
           onClose={() => setShowSuccessToast(false)}
+        />
+      )}
+      {showErrorToast && (
+        <Toast
+          message={errorToastMessage}
+          type="error"
+          onClose={() => setShowErrorToast(false)}
         />
       )}
     </div>
