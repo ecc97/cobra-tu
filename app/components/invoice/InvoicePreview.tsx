@@ -112,9 +112,9 @@ export function InvoicePreview({ data }: InvoicePreviewProps) {
             <span>Impuestos ({(data.taxRate * 100).toFixed(0)}%)</span>
             <span>{currencySymbol}{taxAmount.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between items-center bg-[#111827] text-white p-4 rounded mt-4">
-            <span className="text-[10px] font-bold uppercase tracking-widest">Total</span>
-            <span className="text-[30px] font-bold leading-none">{currencySymbol}{total.toFixed(2)}</span>
+          <div className="grid grid-cols-[1fr_auto] items-center bg-[#111827] text-white px-4 py-3 rounded mt-4 gap-3">
+            <span className="text-[10px] font-bold uppercase tracking-widest leading-none">Total</span>
+            <span className="text-[18px] font-bold leading-none">{currencySymbol}{total.toFixed(2)}</span>
           </div>
         </div>
       </div>
