@@ -45,7 +45,7 @@ export default function NuevaFacturaPage() {
 
   return (
     <div className="h-screen bg-surface overflow-hidden invoice-enter">
-      <nav className="fixed top-0 left-0 right-0 z-50 h-13 bg-surface-container-lowest border-b border-outline-variant/20 px-3 sm:px-6">
+      <nav className="fixed top-0 left-0 right-0 z-50 h-16 bg-surface-container-lowest border-b border-outline-variant/20 px-3 py-1 sm:px-6">
         <div className="h-full max-w-400 mx-auto flex items-center justify-between gap-2 sm:gap-4">
           <span className="text-xl sm:text-2xl font-display font-semibold text-white">InvoiceFlow</span>
           <span className="hidden md:block text-primary font-bold text-sm tracking-widest">
@@ -55,10 +55,10 @@ export default function NuevaFacturaPage() {
             invoiceNumber={invoiceData.invoiceNumber}
             invoiceData={invoiceData}
             fullWidth={false}
-            icon="↓"
+            icon="download"
             label="Descargar PDF"
             containerClassName="min-w-37 sm:min-w-45"
-            buttonClassName="px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg bg-primary text-on-primary"
+            buttonClassName="px-3 sm:px-4 py-2 text-xs sm:text-sm"
           />
         </div>
       </nav>
@@ -95,6 +95,22 @@ export default function NuevaFacturaPage() {
             </div>
           )}
         </section>
+
+        {isAiOptimizing && !isMobilePreviewOpen && (
+          <div className="md:hidden fixed top-15 left-2 right-2 z-40 bg-white/8 backdrop-blur-xl px-3 py-2 rounded-xl border border-white/10 shadow-xl animate-fade-in">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-secondary-container/30 flex items-center justify-center text-secondary">
+                <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  auto_awesome
+                </span>
+              </div>
+              <div>
+                <p className="text-[11px] font-bold text-white">IA está optimizando tus descripciones</p>
+                <p className="text-[10px] text-on-surface/60">Esto puede tardar unos segundos.</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {isMobilePreviewOpen && (
           <div className="md:hidden fixed inset-0 z-50 bg-black/65 animate-fade-in">

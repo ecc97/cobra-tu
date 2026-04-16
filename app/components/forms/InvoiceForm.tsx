@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { InvoiceData, InvoiceItem } from '@/types/invoice';
 import { SUPPORTED_CURRENCIES } from '@/lib/calculations';
 import { validators } from '@/lib/validators';
@@ -26,10 +26,33 @@ export function InvoiceForm({
   const [invoice, setInvoice] = useState<InvoiceData>(initialData);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [showAddItemFeedback, setShowAddItemFeedback] = useState(false);
+  const [priceDrafts, setPriceDrafts] = useState<Record<string, string>>({});
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     onChange?.(invoice);
   }, [invoice, onChange]);
+
+  useEffect(() => {
+    setPriceDrafts((prev) => {
+      const next: Record<string, string> = { ...prev };
+
+      invoice.items.forEach((item) => {
+        if (next[item.id] === undefined) {
+          next[item.id] = item.price > 0 ? item.price.toFixed(2) : '';
+        }
+      });
+
+      Object.keys(next).forEach((itemId) => {
+        const itemExists = invoice.items.some((item) => item.id === itemId);
+        if (!itemExists) {
+          delete next[itemId];
+        }
+      });
+
+      return next;
+    });
+  }, [invoice.items]);
 
   const validateForm = (): string | null => {
     // Validar nombre del emisor
@@ -114,6 +137,51 @@ export function InvoiceForm({
     setValidationError(null);
   };
 
+  const handlePriceInputChange = (itemId: string, rawValue: string) => {
+    const normalizedValue = rawValue.replace(',', '.');
+
+    // Permite borrar, enteros o decimales con hasta 2 decimales.
+    if (!/^\d*(\.\d{0,2})?$/.test(normalizedValue)) {
+      return;
+    }
+
+    setPriceDrafts((prev) => ({ ...prev, [itemId]: normalizedValue }));
+
+    if (!normalizedValue) {
+      updateItem(itemId, 'price', 0);
+      return;
+    }
+
+    const parsedValue = Number(normalizedValue);
+    if (!Number.isNaN(parsedValue)) {
+      updateItem(itemId, 'price', parsedValue);
+    }
+  };
+
+  const handlePriceBlur = (itemId: string) => {
+    const draftValue = priceDrafts[itemId] ?? '';
+
+    if (!draftValue) {
+      setPriceDrafts((prev) => ({ ...prev, [itemId]: '' }));
+      updateItem(itemId, 'price', 0);
+      return;
+    }
+
+    const parsedValue = Number(draftValue);
+    if (Number.isNaN(parsedValue)) {
+      setPriceDrafts((prev) => ({ ...prev, [itemId]: '' }));
+      updateItem(itemId, 'price', 0);
+      return;
+    }
+
+    const normalizedPrice = validators.normalizePrice(parsedValue);
+    setPriceDrafts((prev) => ({
+      ...prev,
+      [itemId]: normalizedPrice.toFixed(2),
+    }));
+    updateItem(itemId, 'price', normalizedPrice);
+  };
+
   const addItem = () => {
     const newItem: InvoiceItem = {
       id: Date.now().toString(),
@@ -137,6 +205,9 @@ export function InvoiceForm({
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Resetear el input permite volver a elegir el mismo archivo y disparar onChange.
+    e.currentTarget.value = '';
 
     // Validación: Tipo de archivo
     const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
@@ -181,6 +252,17 @@ export function InvoiceForm({
       setTimeout(() => setValidationError(null), 3000);
     };
     img.src = URL.createObjectURL(file);
+  };
+
+  const handleLogoRemove = () => {
+    setInvoice((prev) => ({
+      ...prev,
+      emitterLogo: '',
+    }));
+    if (logoInputRef.current) {
+      logoInputRef.current.value = '';
+    }
+    setValidationError(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -228,9 +310,24 @@ export function InvoiceForm({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-[100px_1fr] gap-3 sm:gap-4 items-start">
-          <label className="w-25 h-25 rounded-xl border-2 border-dashed border-surface-container-highest bg-surface-container-lowest hover:border-primary/60 cursor-pointer flex flex-col items-center justify-center text-on-surface/50 transition-colors overflow-hidden">
+          <label className="relative w-25 h-25 rounded-xl border-2 border-dashed border-surface-container-highest bg-surface-container-lowest hover:border-primary/60 cursor-pointer flex flex-col items-center justify-center text-on-surface/50 transition-colors overflow-hidden">
             {invoice.emitterLogo ? (
-              <img src={invoice.emitterLogo} alt="Logo" className="w-full h-full object-cover" />
+              <>
+                <img src={invoice.emitterLogo} alt="Logo" className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  title="Quitar logo"
+                  aria-label="Quitar logo"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    handleLogoRemove();
+                  }}
+                  className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-black/45 text-white/90 hover:bg-black/60 transition-colors flex items-center justify-center"
+                >
+                  <span className="text-sm leading-none">x</span>
+                </button>
+              </>
             ) : (
               <>
                 <span className="material-symbols-outlined text-3xl">add_a_photo</span>
@@ -238,6 +335,7 @@ export function InvoiceForm({
               </>
             )}
             <input
+              ref={logoInputRef}
               type="file"
               accept="image/*"
               onChange={handleLogoUpload}
@@ -419,11 +517,12 @@ export function InvoiceForm({
                 <div className="space-y-1">
                   <label className="text-[10px] uppercase text-on-surface/60 font-semibold tracking-wider">Precio</label>
                   <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={item.price}
-                    onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value))}
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="0.00"
+                    value={priceDrafts[item.id] ?? ''}
+                    onChange={(e) => handlePriceInputChange(item.id, e.target.value)}
+                    onBlur={() => handlePriceBlur(item.id)}
                     className="w-full bg-surface-container-highest border-none rounded-lg text-sm px-3 py-2 text-on-surface focus:ring-1 focus:ring-primary/40"
                   />
                 </div>
@@ -490,6 +589,11 @@ export function InvoiceForm({
           Ver Previsualización
         </button>
       )}
+
+      <p className="text-[11px] leading-relaxed text-on-surface/55 border-t border-outline-variant/20 pt-4">
+        Este documento es un comprobante de cobro generado por el usuario y no constituye una factura
+        electrónica fiscal válida ante autoridades tributarias (DIAN, SAT, AEAT, etc.).
+      </p>
     </form>
   );
 }

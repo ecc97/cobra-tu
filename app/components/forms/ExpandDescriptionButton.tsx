@@ -107,16 +107,16 @@ export function ExpandDescriptionButton({
         onClick={handleExpand}
         disabled={disabled || isLoading}
         title="Mejorar con IA"
-        className="px-3 py-2 rounded bg-secondary text-black text-sm font-semibold hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary-container/22 text-secondary border border-secondary/30 text-sm font-semibold hover:bg-secondary-container/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
       >
         {isLoading ? (
           <>
-            <span className="inline-block animate-spin mr-1">✨</span>
-            ...
+            <span className="inline-block animate-spin">✦</span>
+            Mejorando...
           </>
         ) : (
           <>
-            ✨ Mejorar
+            ✦ Mejorar con IA
           </>
         )}
       </button>

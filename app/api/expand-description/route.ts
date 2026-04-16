@@ -9,7 +9,12 @@ export async function POST(req: Request) {
       );
     }
 
-    const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+    const apiKey = process.env.OPENROUTER_API_KEY ?? process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+
+    if (!process.env.OPENROUTER_API_KEY && process.env.NEXT_PUBLIC_OPENROUTER_API_KEY) {
+      console.warn('Using NEXT_PUBLIC_OPENROUTER_API_KEY as fallback. Migrate to OPENROUTER_API_KEY.');
+    }
+
     if (!apiKey) {
       console.error('OPENROUTER_API_KEY not configured');
       return Response.json(

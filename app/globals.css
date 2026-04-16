@@ -195,3 +195,29 @@
 .pulse-soft {
   animation: pulseSoft 2.8s ease-out infinite;
 }
+
+/* Global scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #383f4d #1a1e28;
+}
+
+*::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #1a1e28;
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #383f4d;
+  border-radius: 999px;
+  border: 1px solid #1a1e28;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #4a5467;
+}

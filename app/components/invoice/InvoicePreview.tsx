@@ -87,7 +87,6 @@ export function InvoicePreview({ data }: InvoicePreviewProps) {
               <tr key={item.id} className={index % 2 === 1 ? 'bg-gray-50/30' : ''}>
                 <td className="py-4.5 pr-4 border-b border-gray-50">
                   <p className="font-medium text-[#111827]">{item.description || 'Servicio profesional'}</p>
-                  <p className="text-[10px] text-gray-400 mt-1">Línea de servicio facturable</p>
                 </td>
                 <td className="py-4.5 text-center border-b border-gray-50">{item.quantity}</td>
                 <td className="py-4.5 text-right border-b border-gray-50">
@@ -119,12 +118,26 @@ export function InvoicePreview({ data }: InvoicePreviewProps) {
         </div>
       </div>
 
+      {data.notes && (
+        <div className="mt-8 pt-4 border-t border-gray-100">
+          <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-2">Notas</p>
+          <p
+            title={data.notes}
+            className="text-[11px] text-gray-500 leading-relaxed overflow-hidden"
+            style={{
+              display: '-webkit-box',
+              WebkitLineClamp: 4,
+              WebkitBoxOrient: 'vertical',
+              maxHeight: '4.8em',
+            }}
+          >
+            {data.notes}
+          </p>
+        </div>
+      )}
+
       <footer className="mt-14 pt-6 border-t border-gray-100 text-center">
-        {data.notes ? (
-          <p className="text-[10px] text-gray-400 italic">{data.notes}</p>
-        ) : (
-          <p className="text-[10px] text-gray-300 italic">Gracias por confiar en nosotros</p>
-        )}
+        <p className="text-[10px] text-gray-300 italic">Gracias por confiar en nosotros</p>
       </footer>
     </div>
   );

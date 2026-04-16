@@ -21,7 +21,7 @@ export function DownloadPDFButton({
   invoiceData,
   disabled = false,
   label = 'Descargar PDF',
-  icon = '📥',
+  icon = 'download',
   fullWidth = true,
   buttonClassName = '',
   containerClassName = '',
@@ -91,16 +91,17 @@ export function DownloadPDFButton({
         onClick={handleDownload}
         disabled={disabled || isLoading || !isValidInvoice}
         title={!isValidInvoice ? 'Completa los datos principales' : ''}
-        className={`${fullWidth ? 'w-full' : ''} px-6 py-3 rounded bg-secondary text-black font-semibold hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 ${buttonClassName}`}
+        className={`${fullWidth ? 'w-full' : ''} inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 sm:py-2.5 bg-primary-container text-on-surface font-semibold text-sm tracking-wide hover:brightness-105 disabled:opacity-50 disabled:cursor-not-allowed transition-all ${buttonClassName}`}
       >
         {isLoading ? (
           <>
-            <span className="inline-block animate-spin">⏳</span>
+            <span className="inline-block animate-spin">◌</span>
             Descargando...
           </>
         ) : (
           <>
-            <span>{icon}</span> {label}
+            <span className="material-symbols-outlined text-[18px]">{icon}</span>
+            <span>{label}</span>
           </>
         )}
       </button>
