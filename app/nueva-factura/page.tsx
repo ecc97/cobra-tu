@@ -1,47 +1,18 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useInvoicePersistence } from '@/hooks/useInvoicePersistence';
 import { InvoiceForm } from '@/components/forms/InvoiceForm';
 import { InvoicePreview } from '@/components/invoice/InvoicePreview';
 import { DownloadPDFButton } from '@/components/invoice/DownloadPDFButton';
-import { InvoiceData } from '@/types/invoice';
-import { DEFAULT_INVOICE } from '@/lib/constants';
+import { useInvoiceStore } from '@/store/invoice-store';
 
 export default function NuevaFacturaPage() {
-  const [invoiceData, setInvoiceData] = useState<InvoiceData>(DEFAULT_INVOICE);
-  const [formKey, setFormKey] = useState(0);
-  const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
-  const [isAiOptimizing, setIsAiOptimizing] = useState(false);
+  const invoiceData = useInvoiceStore((state) => state.invoiceData);
+  const isMobilePreviewOpen = useInvoiceStore((state) => state.isMobilePreviewOpen);
+  const isAiOptimizing = useInvoiceStore((state) => state.isAiOptimizing);
+  const setIsMobilePreviewOpen = useInvoiceStore((state) => state.setIsMobilePreviewOpen);
 
-  useEffect(() => {
-    const raw = localStorage.getItem('lastInvoice');
-    if (!raw) {
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(raw) as Partial<InvoiceData>;
-      const safeItems = Array.isArray(parsed.items) && parsed.items.length > 0
-        ? parsed.items
-        : DEFAULT_INVOICE.items;
-
-      setInvoiceData({
-        ...DEFAULT_INVOICE,
-        ...parsed,
-        items: safeItems,
-      });
-
-      // Force remount once so the form takes restored values as initial state.
-      setFormKey(1);
-    } catch {
-      localStorage.removeItem('lastInvoice');
-    }
-  }, []);
-
-  const handleInvoiceChange = useCallback((data: InvoiceData) => {
-    setInvoiceData(data);
-    localStorage.setItem('lastInvoice', JSON.stringify(data));
-  }, []);
+  useInvoicePersistence();
 
   return (
     <div className="h-screen bg-surface overflow-hidden invoice-enter">
@@ -66,13 +37,7 @@ export default function NuevaFacturaPage() {
       <main className="pt-13 h-screen flex flex-col md:flex-row overflow-hidden">
         <aside className="w-full md:w-[42%] bg-surface-container overflow-y-auto h-full pb-34 md:pb-6 stagger-in-left">
           <div className="p-4 sm:p-6 md:p-8 max-w-3xl">
-            <InvoiceForm
-              key={formKey}
-              initialData={invoiceData}
-              onChange={handleInvoiceChange}
-              showSubmitButton={false}
-              onAiLoadingChange={setIsAiOptimizing}
-            />
+            <InvoiceForm showSubmitButton={false} />
           </div>
         </aside>
 

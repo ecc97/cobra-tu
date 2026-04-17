@@ -1,48 +1,41 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { InvoiceData, InvoiceItem } from '@/types/invoice';
+import { InvoiceData } from '@/types/invoice';
 import { SUPPORTED_CURRENCIES } from '@/lib/calculations';
 import { validators } from '@/lib/validators';
-import { DEFAULT_INVOICE } from '@/lib/constants';
+import { useInvoiceActions } from '@/hooks/useInvoiceActions';
+import { useInvoiceStore } from '@/store/invoice-store';
 import { ExpandDescriptionButton } from './ExpandDescriptionButton';
 import { Toast } from '@/components/ui/Toast';
 
 interface InvoiceFormProps {
-  initialData?: InvoiceData;
-  onChange?: (data: InvoiceData) => void;
   onSubmit?: (data: InvoiceData) => void;
   showSubmitButton?: boolean;
   onAiLoadingChange?: (isLoading: boolean) => void;
 }
 
-type ReceiverField = 'name' | 'email' | 'address' | 'taxId';
-type ReceiverKey = 'receiverName' | 'receiverEmail' | 'receiverAddress' | 'receiverTaxId';
-type EditableItemField = 'description' | 'quantity' | 'price';
-
-const RECEIVER_FIELD_MAP: Record<ReceiverField, ReceiverKey> = {
-  name: 'receiverName',
-  email: 'receiverEmail',
-  address: 'receiverAddress',
-  taxId: 'receiverTaxId',
-};
-
 export function InvoiceForm({
-  initialData = DEFAULT_INVOICE,
-  onChange,
   onSubmit,
   showSubmitButton = true,
   onAiLoadingChange,
 }: InvoiceFormProps) {
-  const [invoice, setInvoice] = useState<InvoiceData>(initialData);
+  const invoice = useInvoiceStore((state) => state.invoiceData);
+  const setIsAiOptimizing = useInvoiceStore((state) => state.setIsAiOptimizing);
+  const {
+    updateEmitter,
+    updateReceiver,
+    updateItem,
+    addItem,
+    removeItem,
+    setIssueDate,
+    updateTaxRatePercent,
+    validateForm,
+  } = useInvoiceActions();
   const [validationError, setValidationError] = useState<string | null>(null);
   const [showAddItemFeedback, setShowAddItemFeedback] = useState(false);
   const [priceDrafts, setPriceDrafts] = useState<Record<string, string>>({});
   const logoInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    onChange?.(invoice);
-  }, [invoice, onChange]);
 
   useEffect(() => {
     setPriceDrafts((prev) => {
@@ -65,105 +58,9 @@ export function InvoiceForm({
     });
   }, [invoice.items]);
 
-  const validateForm = (): string | null => {
-    // Validar nombre del emisor
-    if (!validators.isValidName(invoice.emitterName)) {
-      return 'Tu nombre debe tener al menos 2 caracteres';
-    }
-
-    // Validar email del emisor si está presente
-    if (invoice.emitterEmail && !validators.isValidEmail(invoice.emitterEmail)) {
-      return 'Email inválido';
-    }
-
-    // Validar nombre del receptor
-    if (!validators.isValidName(invoice.receiverName)) {
-      return 'Nombre del cliente debe tener al menos 2 caracteres';
-    }
-
-    // Validar email del receptor si está presente
-    if (invoice.receiverEmail && !validators.isValidEmail(invoice.receiverEmail)) {
-      return 'Email del cliente inválido';
-    }
-
-    // Validar número de factura
-    if (!invoice.invoiceNumber.trim()) {
-      return 'Agrega un número de factura';
-    }
-
-    // Validar rango de fechas
-    if (!validators.isValidDateRange(invoice.issueDate, invoice.dueDate)) {
-      return 'Fecha de vencimiento debe ser igual o posterior a la de emisión';
-    }
-
-    // Validar items
-    if (!validators.hasValidItems(invoice.items)) {
-      return 'Al menos un servicio debe tener descripción, precio y cantidad válidos';
-    }
-
-    return null;
-  };
-
-  const updateEmitter = <K extends keyof InvoiceData>(field: K, value: InvoiceData[K]) => {
-    setInvoice((prev) => ({ ...prev, [field]: value }));
+  useEffect(() => {
     setValidationError(null);
-  };
-
-  const updateReceiver = (field: ReceiverField, value: string) => {
-    const receiverKey = RECEIVER_FIELD_MAP[field];
-    setInvoice((prev) => ({
-      ...prev,
-      [receiverKey]: value,
-    }));
-    setValidationError(null);
-  };
-
-  const updateItem = (itemId: string, field: EditableItemField, value: string | number) => {
-    let finalValue: string | number = value;
-
-    if (field === 'description') {
-      finalValue = String(value);
-    }
-
-    // Validar casos edge según el campo
-    if (field === 'quantity') {
-      const num = parseFloat(String(value));
-      if (isNaN(num) || num < 0) {
-        finalValue = 1; // Default a 1 si es inválido
-      } else {
-        finalValue = Math.max(1, Math.floor(num)); // Mínimo 1, solo enteros
-      }
-    }
-
-    if (field === 'price') {
-      const num = parseFloat(String(value));
-      if (isNaN(num) || num < 0) {
-        finalValue = 0; // Default a 0 si es inválido
-      } else {
-        finalValue = validators.normalizePrice(num); // Máximo 2 decimales
-      }
-    }
-
-    setInvoice((prev) => ({
-      ...prev,
-      items: prev.items.map((item) => {
-        if (item.id !== itemId) {
-          return item;
-        }
-
-        if (field === 'description') {
-          return { ...item, description: String(finalValue) };
-        }
-
-        if (field === 'quantity') {
-          return { ...item, quantity: Number(finalValue) };
-        }
-
-        return { ...item, price: Number(finalValue) };
-      }),
-    }));
-    setValidationError(null);
-  };
+  }, [invoice]);
 
   const handlePriceInputChange = (itemId: string, rawValue: string) => {
     const normalizedValue = rawValue.replace(',', '.');
@@ -210,24 +107,10 @@ export function InvoiceForm({
     updateItem(itemId, 'price', normalizedPrice);
   };
 
-  const addItem = () => {
-    const newItem: InvoiceItem = {
-      id: Date.now().toString(),
-      description: '',
-      quantity: 1,
-      price: 0,
-    };
-    setInvoice((prev) => ({ ...prev, items: [...prev.items, newItem] }));
+  const handleAddItem = () => {
+    addItem();
     setShowAddItemFeedback(true);
     setTimeout(() => setShowAddItemFeedback(false), 2000);
-  };
-
-  const removeItem = (itemId: string) => {
-    if (invoice.items.length === 1) return; // Keep at least one item
-    setInvoice((prev) => ({
-      ...prev,
-      items: prev.items.filter((item) => item.id !== itemId),
-    }));
   };
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -264,10 +147,7 @@ export function InvoiceForm({
 
       const reader = new FileReader();
       reader.onload = () => {
-        setInvoice((prev) => ({
-          ...prev,
-          emitterLogo: reader.result as string,
-        }));
+        updateEmitter('emitterLogo', reader.result as string);
       };
       reader.onerror = () => {
         setValidationError('Error al cargar el archivo');
@@ -283,10 +163,7 @@ export function InvoiceForm({
   };
 
   const handleLogoRemove = () => {
-    setInvoice((prev) => ({
-      ...prev,
-      emitterLogo: '',
-    }));
+    updateEmitter('emitterLogo', '');
     if (logoInputRef.current) {
       logoInputRef.current.value = '';
     }
@@ -306,26 +183,8 @@ export function InvoiceForm({
     onSubmit?.(invoice);
   };
 
-  const updateTaxRatePercent = (value: string) => {
-    const parsed = Number(value);
-    if (Number.isNaN(parsed)) {
-      updateEmitter('taxRate', 0);
-      return;
-    }
-
-    const normalized = Math.min(100, Math.max(0, parsed));
-    updateEmitter('taxRate', normalized / 100);
-  };
-
   const handleIssueDateChange = (value: string) => {
-    setInvoice((prev) => {
-      const adjustedDueDate = prev.dueDate < value ? value : prev.dueDate;
-      return {
-        ...prev,
-        issueDate: value,
-        dueDate: adjustedDueDate,
-      };
-    });
+    setIssueDate(value);
     setValidationError(null);
   };
 
@@ -490,7 +349,7 @@ export function InvoiceForm({
           <h2 className="text-primary text-[1.55rem] sm:text-[1.9rem] leading-none tracking-tight font-display">LÍNEAS DE PRODUCTO</h2>
           <button
             type="button"
-            onClick={addItem}
+            onClick={handleAddItem}
             className="text-secondary text-sm sm:text-base font-semibold inline-flex items-center gap-1.5 hover:brightness-110"
           >
             <span className="material-symbols-outlined text-base">add_circle</span>
@@ -514,7 +373,10 @@ export function InvoiceForm({
                     <ExpandDescriptionButton
                       currentDescription={item.description}
                       onDescriptionUpdated={(newDesc) => updateItem(item.id, 'description', newDesc)}
-                      onLoadingStateChange={onAiLoadingChange}
+                      onLoadingStateChange={(isLoading) => {
+                        setIsAiOptimizing(isLoading);
+                        onAiLoadingChange?.(isLoading);
+                      }}
                     />
                   )}
                 </div>
