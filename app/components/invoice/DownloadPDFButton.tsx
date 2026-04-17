@@ -68,9 +68,9 @@ export function DownloadPDFButton({
         clearTimeout(timeoutId);
         setError(null);
         setShowSuccessToast(true);
-      } catch (pdfErr: any) {
+      } catch (pdfErr: unknown) {
         clearTimeout(timeoutId);
-        if (pdfErr.name === 'AbortError') {
+        if (pdfErr instanceof DOMException && pdfErr.name === 'AbortError') {
           setError('Generación de PDF tardó mucho');
         } else {
           setError('Error al generar PDF. Intenta de nuevo');

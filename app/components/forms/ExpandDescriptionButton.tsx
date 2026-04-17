@@ -82,8 +82,8 @@ export function ExpandDescriptionButton({
       onDescriptionUpdated(data.expandedDescription);
       setError(null);
       setShowSuccessToast(true);
-    } catch (err: any) {
-      if (err.name === 'AbortError') {
+    } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
         setError('La solicitud tardó demasiado. Vuelve a intentarlo.');
         showTimeoutToast();
       } else if (err instanceof TypeError && err.message.includes('fetch')) {

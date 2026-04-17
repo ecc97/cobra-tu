@@ -16,6 +16,17 @@ interface InvoiceFormProps {
   onAiLoadingChange?: (isLoading: boolean) => void;
 }
 
+type ReceiverField = 'name' | 'email' | 'address' | 'taxId';
+type ReceiverKey = 'receiverName' | 'receiverEmail' | 'receiverAddress' | 'receiverTaxId';
+type EditableItemField = 'description' | 'quantity' | 'price';
+
+const RECEIVER_FIELD_MAP: Record<ReceiverField, ReceiverKey> = {
+  name: 'receiverName',
+  email: 'receiverEmail',
+  address: 'receiverAddress',
+  taxId: 'receiverTaxId',
+};
+
 export function InvoiceForm({
   initialData = DEFAULT_INVOICE,
   onChange,
@@ -93,25 +104,30 @@ export function InvoiceForm({
     return null;
   };
 
-  const updateEmitter = (field: keyof InvoiceData, value: any) => {
+  const updateEmitter = <K extends keyof InvoiceData>(field: K, value: InvoiceData[K]) => {
     setInvoice((prev) => ({ ...prev, [field]: value }));
     setValidationError(null);
   };
 
-  const updateReceiver = (field: string, value: string) => {
+  const updateReceiver = (field: ReceiverField, value: string) => {
+    const receiverKey = RECEIVER_FIELD_MAP[field];
     setInvoice((prev) => ({
       ...prev,
-      [`receiver${field.charAt(0).toUpperCase()}${field.slice(1)}`]: value,
-    } as any));
+      [receiverKey]: value,
+    }));
     setValidationError(null);
   };
 
-  const updateItem = (itemId: string, field: keyof InvoiceItem, value: any) => {
-    let finalValue = value;
+  const updateItem = (itemId: string, field: EditableItemField, value: string | number) => {
+    let finalValue: string | number = value;
+
+    if (field === 'description') {
+      finalValue = String(value);
+    }
 
     // Validar casos edge según el campo
     if (field === 'quantity') {
-      const num = parseFloat(value);
+      const num = parseFloat(String(value));
       if (isNaN(num) || num < 0) {
         finalValue = 1; // Default a 1 si es inválido
       } else {
@@ -120,7 +136,7 @@ export function InvoiceForm({
     }
 
     if (field === 'price') {
-      const num = parseFloat(value);
+      const num = parseFloat(String(value));
       if (isNaN(num) || num < 0) {
         finalValue = 0; // Default a 0 si es inválido
       } else {
@@ -130,9 +146,21 @@ export function InvoiceForm({
 
     setInvoice((prev) => ({
       ...prev,
-      items: prev.items.map((item) =>
-        item.id === itemId ? { ...item, [field]: finalValue } : item
-      ),
+      items: prev.items.map((item) => {
+        if (item.id !== itemId) {
+          return item;
+        }
+
+        if (field === 'description') {
+          return { ...item, description: String(finalValue) };
+        }
+
+        if (field === 'quantity') {
+          return { ...item, quantity: Number(finalValue) };
+        }
+
+        return { ...item, price: Number(finalValue) };
+      }),
     }));
     setValidationError(null);
   };
