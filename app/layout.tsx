@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display, DM_Sans } from "next/font/google";
-import "./globals.css";
+import "./styles/globals.css";
 
 const inter = Inter({
   variable: "--font-inter",

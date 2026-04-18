@@ -1,9 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useAiDescription } from '@/hooks/useAiDescription';
 import { Toast } from '@/components/ui/Toast';
-
-const IA_TIMEOUT_MS = 30000;
 
 interface ExpandDescriptionButtonProps {
   currentDescription: string;
@@ -18,86 +16,19 @@ export function ExpandDescriptionButton({
   disabled = false,
   onLoadingStateChange,
 }: ExpandDescriptionButtonProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showSuccessToast, setShowSuccessToast] = useState(false);
-  const [showErrorToast, setShowErrorToast] = useState(false);
-  const [errorToastMessage, setErrorToastMessage] = useState('');
-
-  const showTimeoutToast = () => {
-    setErrorToastMessage('La IA tardó más de 30s. Inténtalo de nuevo.');
-    setShowErrorToast(true);
-  };
+  const {
+    isLoading,
+    error,
+    showSuccessToast,
+    showErrorToast,
+    errorToastMessage,
+    runExpandDescription,
+    closeSuccessToast,
+    closeErrorToast,
+  } = useAiDescription({ onLoadingStateChange });
 
   const handleExpand = async () => {
-    if (!currentDescription.trim()) {
-      setError('Escribe una descripción primero');
-      return;
-    }
-
-    // Prevenir múltiples requests simultáneos
-    if (isLoading) {
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      onLoadingStateChange?.(true);
-      setError(null);
-
-      // Timeout ampliado para cuentas gratuitas con latencia variable.
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), IA_TIMEOUT_MS);
-
-      const response = await fetch('/api/expand-description', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ description: currentDescription }),
-        signal: controller.signal,
-      }).finally(() => clearTimeout(timeoutId));
-
-      if (!response.ok) {
-        if (response.status === 429) {
-          setError('Límite de solicitudes. Intenta en unos minutos');
-        } else if (response.status === 400) {
-          setError('Descripción vacía o inválida');
-        } else if (response.status === 401 || response.status === 403) {
-          setError('API key inválida. Configura una nueva');
-        } else if (response.status === 503) {
-          setError('Servicio no disponible. Intenta luego');
-        } else if (response.status === 500) {
-          setError('Error del servidor. Intenta de nuevo');
-        } else {
-          setError(`Error ${response.status}. Intenta de nuevo`);
-        }
-        return;
-      }
-
-      const data = await response.json();
-      if (!data.expandedDescription) {
-        setError('Respuesta vacía de IA');
-        return;
-      }
-
-      onDescriptionUpdated(data.expandedDescription);
-      setError(null);
-      setShowSuccessToast(true);
-    } catch (err: unknown) {
-      if (err instanceof DOMException && err.name === 'AbortError') {
-        setError('La solicitud tardó demasiado. Vuelve a intentarlo.');
-        showTimeoutToast();
-      } else if (err instanceof TypeError && err.message.includes('fetch')) {
-        setError('Error de red. Verifica tu conexión');
-      } else if (err instanceof TypeError) {
-        setError('Error de conexión. Intenta de nuevo');
-      } else {
-        setError('Error inesperado. Intenta de nuevo');
-      }
-      console.error('Expand description error:', err);
-    } finally {
-      setIsLoading(false);
-      onLoadingStateChange?.(false);
-    }
+    await runExpandDescription(currentDescription, onDescriptionUpdated);
   };
 
   return (
@@ -126,14 +57,14 @@ export function ExpandDescriptionButton({
         <Toast
           message="Descripción mejorada"
           type="success"
-          onClose={() => setShowSuccessToast(false)}
+          onClose={closeSuccessToast}
         />
       )}
       {showErrorToast && (
         <Toast
           message={errorToastMessage}
           type="error"
-          onClose={() => setShowErrorToast(false)}
+          onClose={closeErrorToast}
         />
       )}
     </div>
