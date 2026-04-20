@@ -18,7 +18,9 @@ export default function NuevaFacturaPage() {
     <div className="h-screen bg-surface overflow-hidden invoice-enter">
       <nav className="fixed top-0 left-0 right-0 z-50 h-16 bg-surface-container-lowest border-b border-outline-variant/20 px-3 py-1 sm:px-6">
         <div className="h-full max-w-400 mx-auto flex items-center justify-between gap-2 sm:gap-4">
-          <span className="text-xl sm:text-2xl font-display font-semibold text-white">InvoiceFlow</span>
+          <a href="/" className="flex items-center gap-2">
+            <span className="text-xl sm:text-2xl font-display font-semibold text-white">CobraTú</span>
+          </a>
           <span className="hidden md:block text-primary font-bold text-sm tracking-widest">
             Factura #{invoiceData.invoiceNumber.padStart(3, '0')}
           </span>

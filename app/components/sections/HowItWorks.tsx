@@ -30,7 +30,7 @@ const STEPS: Step[] = [
 
 export default function HowItWorks() {
   return (
-    <section className="py-24 bg-surface-container-low">
+    <section id="como-funciona" className="py-24 bg-surface-container-low">
       <div className="max-w-7xl mx-auto px-8">
         <h2 className="text-center font-display text-4xl mb-20 text-on-surface">El proceso del artesano financiero</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
