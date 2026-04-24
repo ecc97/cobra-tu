@@ -2,6 +2,7 @@
 
 import { InvoiceData } from '@/types/invoice';
 import { SUPPORTED_CURRENCIES } from '@/lib/calculations';
+import { DEFAULT_INVOICE } from '@/lib/constants';
 import { useInvoiceFormController } from '@/hooks/useInvoiceFormController';
 import { ExpandDescriptionButton } from './ExpandDescriptionButton';
 import { Toast } from '@/components/ui/Toast';
@@ -36,7 +37,28 @@ export function InvoiceForm({
     handleSubmit,
     handleIssueDateChange,
     handleAiLoadingChange,
+    handleClearForm,
   } = useInvoiceFormController({ onSubmit, onAiLoadingChange });
+
+  const hasInvoiceChanges =
+    invoice.emitterName.trim().length > 0 ||
+    invoice.emitterEmail.trim().length > 0 ||
+    invoice.emitterPhone.trim().length > 0 ||
+    invoice.emitterAddress.trim().length > 0 ||
+    invoice.emitterTaxId.trim().length > 0 ||
+    Boolean(invoice.emitterLogo) ||
+    invoice.receiverName.trim().length > 0 ||
+    invoice.receiverEmail.trim().length > 0 ||
+    invoice.receiverAddress.trim().length > 0 ||
+    invoice.receiverTaxId.trim().length > 0 ||
+    (invoice.notes?.trim().length ?? 0) > 0 ||
+    invoice.invoiceNumber !== DEFAULT_INVOICE.invoiceNumber ||
+    invoice.issueDate !== DEFAULT_INVOICE.issueDate ||
+    invoice.dueDate !== DEFAULT_INVOICE.dueDate ||
+    invoice.currency !== DEFAULT_INVOICE.currency ||
+    invoice.taxRate !== DEFAULT_INVOICE.taxRate ||
+    invoice.items.length !== DEFAULT_INVOICE.items.length ||
+    invoice.items.some((item) => item.description.trim().length > 0 || item.quantity !== 1 || item.price > 0);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
@@ -318,14 +340,26 @@ export function InvoiceForm({
         </div>
       )}
 
-      {showSubmitButton && (
-        <button
-          type="submit"
-          className="w-full px-4 sm:px-6 py-3 rounded bg-primary text-on-primary font-semibold hover:bg-primary-container transition-colors text-sm sm:text-base"
-        >
-          Ver Previsualización
-        </button>
-      )}
+      <div className={`grid grid-cols-1 ${showSubmitButton && hasInvoiceChanges ? 'sm:grid-cols-2' : ''} gap-3`}>
+        {hasInvoiceChanges && (
+          <button
+            type="button"
+            onClick={handleClearForm}
+            className="w-full px-4 sm:px-6 py-3 rounded border border-outline-variant/40 bg-surface-container-low text-on-surface font-semibold hover:bg-surface-container text-sm sm:text-base transition-colors"
+          >
+            Limpiar formulario
+          </button>
+        )}
+
+        {showSubmitButton && (
+          <button
+            type="submit"
+            className="w-full px-4 sm:px-6 py-3 rounded bg-primary text-on-primary font-semibold hover:bg-primary-container transition-colors text-sm sm:text-base"
+          >
+            Ver Previsualización
+          </button>
+        )}
+      </div>
 
       <p className="text-[11px] leading-relaxed text-on-surface/55 border-t border-outline-variant/20 pt-4">
         Este documento es un comprobante de cobro generado por el usuario y no constituye una factura

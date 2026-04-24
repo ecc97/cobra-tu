@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { validators } from '@/lib/validators';
+import { DEFAULT_INVOICE } from '@/lib/constants';
 import { InvoiceData } from '@/types/invoice';
 import { useInvoiceActions } from '@/hooks/useInvoiceActions';
 import { useInvoiceStore } from '@/store/invoice-store';
@@ -15,6 +16,7 @@ export function useInvoiceFormController({
 }: UseInvoiceFormControllerParams) {
   const invoice = useInvoiceStore((state) => state.invoiceData);
   const setIsAiOptimizing = useInvoiceStore((state) => state.setIsAiOptimizing);
+  const setInvoice = useInvoiceStore((state) => state.setInvoice);
 
   const {
     updateEmitter,
@@ -185,6 +187,27 @@ export function useInvoiceFormController({
     onAiLoadingChange?.(isLoading);
   };
 
+  const handleClearForm = () => {
+    const shouldClear = window.confirm('Se limpiaran todos los campos y el logo. Quieres continuar?');
+    if (!shouldClear) {
+      return;
+    }
+
+    setInvoice({
+      ...DEFAULT_INVOICE,
+      items: DEFAULT_INVOICE.items.map((item) => ({ ...item })),
+    });
+    setPriceDrafts({});
+    setValidationError(null);
+    setShowAddItemFeedback(false);
+    setIsAiOptimizing(false);
+    onAiLoadingChange?.(false);
+
+    if (logoInputRef.current) {
+      logoInputRef.current.value = '';
+    }
+  };
+
   return {
     invoice,
     logoInputRef,
@@ -204,5 +227,6 @@ export function useInvoiceFormController({
     handleSubmit,
     handleIssueDateChange,
     handleAiLoadingChange,
+    handleClearForm,
   };
 }
