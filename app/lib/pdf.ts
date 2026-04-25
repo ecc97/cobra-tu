@@ -2,6 +2,39 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 const OKLCH_PATTERN = /oklch|oklab|lab\(|lch\(|color\(/i;
+const PDF_MARGIN_MM = 10;
+
+function resolveColorValue(property: string, value: string): string {
+  if (!OKLCH_PATTERN.test(value)) {
+    return value;
+  }
+
+  const tempElement = document.createElement('div');
+  tempElement.style.setProperty(property, value);
+  document.body.appendChild(tempElement);
+
+  const resolved = window.getComputedStyle(tempElement).getPropertyValue(property);
+  document.body.removeChild(tempElement);
+
+  if (resolved && !OKLCH_PATTERN.test(resolved)) {
+    return resolved;
+  }
+
+  // Evita bloques oscuros en fondos cuando html2canvas no interpreta funciones modernas de color.
+  if (property.includes('background')) {
+    return 'transparent';
+  }
+
+  if (property.includes('border')) {
+    return '#e5e7eb';
+  }
+
+  if (property.includes('color')) {
+    return '#111827';
+  }
+
+  return value;
+}
 
 function isUnsupportedColorError(error: unknown): boolean {
   if (!error || typeof error !== 'object') {
@@ -79,17 +112,9 @@ function createCaptureClone(source: HTMLElement): {
       let value = computed.getPropertyValue(property);
       const priority = computed.getPropertyPriority(property);
 
-      // ✅ Convierte colores no soportados a hex equivalente aproximado
+      // Normaliza funciones de color modernas para evitar fallos de parseo en html2canvas.
       if (OKLCH_PATTERN.test(value)) {
-        // Crear un elemento temporal para que el browser resuelva el color
-        const tmp = document.createElement('div');
-        tmp.style.setProperty(property, value);
-        document.body.appendChild(tmp);
-        const resolved = window.getComputedStyle(tmp).getPropertyValue(property);
-        document.body.removeChild(tmp);
-
-        // Si el browser pudo resolverlo a rgb(), usarlo; si no, fallback seguro
-        value = resolved && !OKLCH_PATTERN.test(resolved) ? resolved : '#111827';
+        value = resolveColorValue(property, value);
       }
 
       cloneElement.style.setProperty(property, value, priority);
@@ -149,8 +174,7 @@ export async function generatePDFFromElement(
       cleanup();
     }
 
-    // Crear PDF
-    const imgData = canvas.toDataURL('image/png');
+    // Crear PDF multipágina para evitar recortes cuando el contenido supera un A4.
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
@@ -158,10 +182,52 @@ export async function generatePDFFromElement(
     });
 
     const pdfWidth = pdf.internal.pageSize.getWidth();
-    const imgWidth = pdfWidth - 20; // Márgenes
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const contentWidthMm = pdfWidth - PDF_MARGIN_MM * 2;
+    const contentHeightMm = pdfHeight - PDF_MARGIN_MM * 2;
 
-    pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+    const pxPerMm = canvas.width / contentWidthMm;
+    const pageSliceHeightPx = Math.max(1, Math.floor(contentHeightMm * pxPerMm));
+
+    let offsetY = 0;
+    let pageIndex = 0;
+
+    while (offsetY < canvas.height) {
+      const sliceHeightPx = Math.min(pageSliceHeightPx, canvas.height - offsetY);
+
+      const pageCanvas = document.createElement('canvas');
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = sliceHeightPx;
+
+      const context = pageCanvas.getContext('2d');
+      if (!context) {
+        throw new Error('No fue posible crear el contexto 2D para paginar PDF');
+      }
+
+      context.drawImage(
+        canvas,
+        0,
+        offsetY,
+        canvas.width,
+        sliceHeightPx,
+        0,
+        0,
+        canvas.width,
+        sliceHeightPx
+      );
+
+      if (pageIndex > 0) {
+        pdf.addPage();
+      }
+
+      const imageHeightMm = sliceHeightPx / pxPerMm;
+      const imageData = pageCanvas.toDataURL('image/png');
+      pdf.addImage(imageData, 'PNG', PDF_MARGIN_MM, PDF_MARGIN_MM, contentWidthMm, imageHeightMm, undefined, 'FAST');
+
+      offsetY += sliceHeightPx;
+      pageIndex += 1;
+    }
+
     pdf.save(fileName);
   } catch (error) {
     console.error('Error generating PDF:', error);
