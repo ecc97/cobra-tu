@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { generatePDFFromElement } from '@/lib/pdf';
+import { generatePDFFromData } from '@/lib/pdf';
 import { InvoiceData } from '@/types/invoice';
 
-const PDF_TIMEOUT_MS = 15000;
+const PDF_TIMEOUT_MS = 15_000;
 
 interface UsePdfDownloadParams {
   invoiceData?: InvoiceData;
@@ -21,46 +21,30 @@ export function usePdfDownload({ invoiceData, invoiceNumber }: UsePdfDownloadPar
     invoiceData.items.some((item) => item.description.trim() && item.price > 0);
 
   const handleDownload = async () => {
-    if (!isValidInvoice) {
+    if (!isValidInvoice || !invoiceData) {
       setError('Completa los datos principales para descargar');
       return;
     }
 
-    if (isLoading) {
-      return;
-    }
+    if (isLoading) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    const timeoutId = setTimeout(() => {
+      setIsLoading(false);
+      setError('Generación de PDF tardó mucho');
+    }, PDF_TIMEOUT_MS);
 
     try {
-      setIsLoading(true);
-      setError(null);
-
-      if (!navigator.onLine) {
-        setError('Sin conexión a internet');
-        return;
-      }
-
-      const fileName = `factura-${invoiceNumber}-${new Date().getTime()}.pdf`;
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), PDF_TIMEOUT_MS);
-
-      try {
-        await generatePDFFromElement('invoice-paper', fileName);
-        clearTimeout(timeoutId);
-        setError(null);
-        setShowSuccessToast(true);
-      } catch (pdfErr: unknown) {
-        clearTimeout(timeoutId);
-        if (pdfErr instanceof DOMException && pdfErr.name === 'AbortError') {
-          setError('Generación de PDF tardó mucho');
-        } else {
-          setError('Error al generar PDF. Intenta de nuevo');
-        }
-        console.error('PDF error:', pdfErr);
-      }
+      const fileName = `factura-${invoiceNumber}-${Date.now()}.pdf`;
+      await generatePDFFromData(invoiceData, fileName);
+      clearTimeout(timeoutId);
+      setShowSuccessToast(true);
     } catch (err) {
-      setError('Error inesperado. Intenta de nuevo');
-      console.error(err);
+      clearTimeout(timeoutId);
+      setError('Error al generar PDF. Intenta de nuevo');
+      console.error('PDF error:', err);
     } finally {
       setIsLoading(false);
     }
