@@ -1,8 +1,17 @@
 import Link from 'next/link';
+import { VideoModal } from '@/components/modals/VideoModal';
+import { useVideoModal } from '@/hooks/useVideoModal';
 
 export default function Hero() {
+  const { isOpen, openModal, closeModal } = useVideoModal();
+
   return (
     <main className="pt-32 pb-24 overflow-hidden">
+      <VideoModal
+        isOpen={isOpen}
+        onClose={closeModal}
+        videoSrc="/videos/demo-invoice.mp4"
+      />
       <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
         {/* Left: Text */}
         <div className="space-y-8">
@@ -28,7 +37,10 @@ export default function Hero() {
             >
               Crear factura ahora
             </Link>
-            <button className="bg-surface-container-highest text-on-surface px-8 py-4 rounded-lg font-bold text-sm uppercase tracking-widest hover:bg-surface-bright transition-colors">
+            <button 
+              onClick={openModal} 
+              className="bg-surface-container-highest text-on-surface px-8 py-4 rounded-lg font-bold text-sm uppercase tracking-widest hover:bg-surface-bright transition-colors"
+            >
               Ver ejemplo
             </button>
           </div>
