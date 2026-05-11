@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   title: "CobraTú - Generador de Facturas",
   description: "Crea facturas profesionales sin cuenta. En menos de 2 minutos.",
   keywords: ["facturas", "invoices", "generador", "freelancer", "IA"],
+  other: {
+    "lh3k-verify": "905ed942a935b44b601debcafa1af1ec"
+  }
 };
 
 export default function RootLayout({
